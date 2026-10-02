@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HOSTOLD | Mapas de Accesibilidad</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>HOSTOLD</h1>
+  <p>Mapas de Accesibilidad ♿</p>
+</header>
+
+<main>
+<section class="panel">
+  <h2>Buscar ubicación</h2>
+
+  <label for="region">Región</label>
+  <select id="region"><option value="">Seleccione...</option></select>
+
+  <label for="provincia">Provincia</label>
+  <select id="provincia" disabled><option value="">Seleccione...</option></select>
+
+  <label for="distrito">Distrito</label>
+  <select id="distrito" disabled><option value="">Seleccione...</option></select>
+
+  <label for="lugar">Lugar</label>
+  <select id="lugar" disabled><option value="">Seleccione...</option></select>
+
+  <button id="guardar">Guardar ubicación</button>
+  <p id="mensaje">Seleccione una ubicación.</p>
+</section>
+</main>
+
+<div id="visorMapa" class="visor-mapa">
+  <div class="visor-contenido">
+    <button id="cerrarMapa" class="cerrar-mapa" aria-label="Cerrar">×</button>
+    <img id="imagenMapa" src="" alt="Mapa de accesibilidad">
+    <a id="descargarMapa" class="boton-descargar" href="#" download>Descargar mapa</a>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
