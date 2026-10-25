@@ -16,13 +16,11 @@
   <main>
     <!-- Panel de Autenticación Unificado -->
     <section id="panelAuth" class="panel">
-      <!-- Pestañas superiores para cambiar de modo -->
       <div class="pestanas-auth">
         <button id="tabLogin" class="tab-btn activa" type="button">Ingresar</button>
         <button id="tabRegistro" class="tab-btn" type="button">Registrarse</button>
       </div>
       
-      <!-- FORMULARIO DE INICIO DE SESIÓN -->
       <div id="formLogin">
         <h2>Iniciar Sesión</h2>
         <label for="loginUsuario">Usuario</label>
@@ -34,7 +32,6 @@
         <button id="btnIngresar" type="button">Ingresar</button>
       </div>
 
-      <!-- FORMULARIO DE REGISTRO (Oculto por defecto con hidden) -->
       <div id="formRegistro" hidden>
         <h2>Crear Cuenta</h2>
         <label for="regUsuario">Nuevo Usuario</label>
@@ -49,11 +46,10 @@
         <button id="btnRegistrar" type="button">Registrarse</button>
       </div>
 
-      <!-- Mensajes de estado del Login/Registro -->
       <p id="mensajeAuth" role="status" class="error-login"></p>
     </section>
 
-    <!-- Panel de Búsqueda de Mapas (Oculto por defecto) -->
+    <!-- Panel de Búsqueda de Mapas -->
     <section id="panelMapas" class="panel" hidden>
       <div class="header-panel-mapas">
         <h2>Buscar ubicación</h2>
@@ -80,35 +76,33 @@
         <option value="">Seleccione...</option>
       </select>
 
-      <button id="guardar" type="button">
-        Guardar ubicación
-      </button>
+      <button id="guardar" type="button">Guardar ubicación</button>
 
-      <p id="mensaje" role="status">
-        Seleccione una ubicación.
-      </p>
+      <p id="mensaje" role="status">Seleccione una ubicación.</p>
+
+      <!-- Leyenda de Accesibilidad para Sillas de Ruedas -->
+      <div class="leyenda-accesibilidad">
+        <h3>Leyenda de Accesibilidad ♿</h3>
+        <ul>
+          <li><span class="icono">🟢</span> <strong>Ruta Accesible:</strong> Pasadizos amplios y libres de obstáculos.</li>
+          <li><span class="icono">📐</span> <strong>Rampa Regulada:</strong> Pendiente segura e inclinación adecuada.</li>
+          <li><span class="icono">🚾</span> <strong>Baño Adaptado:</strong> Espacio amplio con barras de apoyo metálicas.</li>
+          <li><span class="icono">🛗</span> <strong>Ascensor Amplio:</strong> Puerta ancha y botonera a altura accesible.</li>
+          <li><span class="icono">🚪</span> <strong>Ingreso Plano:</strong> Puertas principales a ras de suelo o automáticas.</li>
+          <li><span class="icono">⚠️</span> <strong>Zona Crítica:</strong> Zonas con baches, adoquines o giros muy cerrados.</li>
+          <li><span class="icono">🛑</span> <strong>¡Evitar (Escaleras)!:</strong> Gradas sin alternativa de rampa o elevador.</li>
+        </ul>
+      </div>
     </section>
   </main>
 
   <div id="visorMapa" class="visor-mapa" aria-hidden="true">
-    <section class="visor-contenido" role="dialog"
-      aria-modal="true" aria-label="Mapa del lugar">
-
-      <button id="cerrarMapa" class="cerrar-mapa"
-        type="button" aria-label="Cerrar mapa">×</button>
-
+    <section class="visor-contenido" role="dialog" aria-modal="true" aria-label="Mapa del lugar">
+      <button id="cerrarMapa" class="cerrar-mapa" type="button" aria-label="Cerrar mapa">×</button>
       <h2>Mapa de Accesibilidad</h2>
-
       <img id="imagenMapa" src="" alt="Mapa del lugar">
-
-      <p id="errorImagen" class="error-imagen" hidden>
-        No se pudo cargar el mapa. Comprueba el nombre del archivo.
-      </p>
-
-      <a id="descargarMapa" class="boton-descargar"
-        href="#" download>
-        Descargar mapa
-      </a>
+      <p id="errorImagen" class="error-imagen" hidden>No se pudo cargar el mapa. Comprueba el nombre del archivo.</p>
+      <a id="descargarMapa" class="boton-descargar" href="#" download>Descargar mapa</a>
     </section>
   </div>
 
