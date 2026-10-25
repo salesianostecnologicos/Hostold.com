@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const mapasConfig = {
     "Colegio Salesiano Santa Rosa": { alt: "Mapa del Colegio Salesiano Santa Rosa", pisos: { 1: "IMG-20261001-WA0020.jpg" } },
     "Open Plaza Huancayo": { alt: "Plano de Evacuación - Open Plaza Huancayo (Piso 1)", pisos: { 1: "image_35840f16.jpg" } },
-    "I.E. 31554 José Carlos Mariátegui": { alt: "Plano de Evacuación - I.E. Mariátegui", pisos: { 1: "mariategui_piso1.jpg", 2: "mariategui_piso2.jpg" } }
+    "I.E. 31554 José Carlos Mariátegui": { alt: "Plano de Evacuación - I.E. Mariátegui", pisos: { 1: "image_730ff32a.jpg", 2: "mariategui_piso2.jpg" } }
   };
   let mapaActual = null;
 
