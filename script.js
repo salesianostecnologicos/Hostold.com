@@ -9,12 +9,17 @@ const datos = {
   }
 };
 
-// --- Elementos del DOM del Login ---
+// --- Elementos del DOM del Login y Registro ---
 const panelLogin = document.getElementById("panelLogin");
 const panelMapas = document.getElementById("panelMapas");
+const tabLogin = document.getElementById("tabLogin");
+const tabRegistro = document.getElementById("tabRegistro");
+const tituloAuth = document.getElementById("tituloAuth");
 const inputUsuario = document.getElementById("usuario");
 const inputPassword = document.getElementById("password");
-const btnIngresar = document.getElementById("btnIngresar");
+const grupoConfirmarPass = document.getElementById("grupoConfirmarPass");
+const inputConfirmarPassword = document.getElementById("confirmarPassword");
+const btnAuthAccion = document.getElementById("btnAuthAccion");
 const mensajeLogin = document.getElementById("mensajeLogin");
 const btnCerrarSesion = document.getElementById("btnCerrarSesion");
 
@@ -33,45 +38,102 @@ const imagenMapa = document.getElementById("imagenMapa");
 const descargarMapa = document.getElementById("descargarMapa");
 const errorImagen = document.getElementById("errorImagen");
 
-// Nombres de los archivos de imagen correspondientes
+// Nombres de los archivos de imagen
 const mapaSalesiano = "IMG-20261001-WA0020.jpg";
 const mapaOpenPlaza = "image_35840f16.jpg";
 
-// --- CONTROL DE INICIO DE SESIÓN ---
-const USUARIO_VALIDO = "admin";
-const PASSWORD_VALIDO = "1234";
+// Estado de la pestaña actual: "login" o "registro"
+let modoAuth = "login";
 
-btnIngresar.addEventListener("click", iniciarSesion);
+// --- CONTROL DE PESTAÑAS (LOGIN / REGISTRO) ---
+tabLogin.addEventListener("click", () => {
+  modoAuth = "login";
+  tabLogin.classList.add("activa");
+  tabRegistro.classList.remove("activa");
+  tituloAuth.textContent = "Iniciar Sesión";
+  btnAuthAccion.textContent = "Ingresar";
+  grupoConfirmarPass.hidden = true;
+  mensajeLogin.textContent = "";
+});
 
-// Permitir ingresar presionando Enter en los inputs
-inputUsuario.addEventListener("keydown", (e) => { if (e.key === "Enter") iniciarSesion(); });
-inputPassword.addEventListener("keydown", (e) => { if (e.key === "Enter") iniciarSesion(); });
+tabRegistro.addEventListener("click", () => {
+  modoAuth = "registro";
+  tabRegistro.classList.add("activa");
+  tabLogin.classList.remove("activa");
+  tituloAuth.textContent = "Crear Cuenta";
+  btnAuthAccion.textContent = "Registrarse";
+  grupoConfirmarPass.hidden = false;
+  mensajeLogin.textContent = "";
+});
 
-function iniciarSesion() {
-  const user = inputUsuario.value.trim();
+// --- PROCESAR AUTENTICACIÓN ---
+btnAuthAccion.addEventListener("click", procesarAuth);
+
+function procesarAuth() {
+  const user = inputUsuario.value.trim().toLowerCase();
   const pass = inputPassword.value;
+  const confirmPass = inputConfirmarPassword.value;
 
-  if (user === USUARIO_VALIDO && pass === PASSWORD_VALIDO) {
-    sessionStorage.setItem("sesionHOSTOLD", "activa");
-    mensajeLogin.textContent = "";
-    inputUsuario.value = "";
-    inputPassword.value = "";
-    
-    mostrarPanelMapas();
+  if (!user || !pass) {
+    mensajeLogin.textContent = "Por favor, complete todos los campos.";
+    return;
+  }
+
+  // Obtener lista de usuarios registrados del LocalStorage (o inicializar vacía)
+  let usuariosRegistrados = JSON.parse(localStorage.getItem("usuariosHOSTOLD")) || {};
+
+  // Incluir cuenta maestra por defecto por si acaso
+  usuariosRegistrados["admin"] = "1234";
+
+  if (modoAuth === "login") {
+    // LÓGICA DE INICIO DE SESIÓN
+    if (usuariosRegistrados[user] && usuariosRegistrados[user] === pass) {
+      sessionStorage.setItem("sesionHOSTOLD", "activa");
+      mensajeLogin.textContent = "";
+      inputUsuario.value = "";
+      inputPassword.value = "";
+      mostrarPanelMapas();
+    } else {
+      mensajeLogin.textContent = "Usuario o contraseña incorrectos.";
+    }
   } else {
-    mensajeLogin.textContent = "Usuario o contraseña incorrectos.";
+    // LÓGICA DE REGISTRO
+    if (usuariosRegistrados[user]) {
+      mensajeLogin.textContent = "El nombre de usuario ya está registrado.";
+      return;
+    }
+
+    if (pass.length < 4) {
+      mensajeLogin.textContent = "La contraseña debe tener al menos 4 caracteres.";
+      return;
+    }
+
+    if (pass !== confirmPass) {
+      mensajeLogin.textContent = "Las contraseñas no coinciden.";
+      return;
+    }
+
+    // Guardar nuevo usuario
+    usuariosRegistrados[user] = pass;
+    localStorage.setItem("usuariosHOSTOLD", JSON.stringify(usuariosRegistrados));
+
+    mensajeLogin.style.color = "#00ffaa";
+    mensajeLogin.textContent = "¡Registro exitoso! Ya puedes iniciar sesión.";
+    
+    // Cambiar automáticamente a la pestaña de Login después de 1.5 segundos
+    setTimeout(() => {
+      mensajeLogin.style.color = "#ff8b8b";
+      tabLogin.click();
+      inputUsuario.value = user;
+    }, 1500);
   }
 }
 
 function mostrarPanelMapas() {
   panelLogin.hidden = true;
   panelMapas.hidden = false;
-  
-  // Reiniciar selectores por si acaso y cargar base
   limpiarSelect(region);
   agregarOpciones(region, Object.keys(datos));
-  
-  // Ejecutar la restauración si tiene una ubicación previa guardada en LocalStorage
   cargarUbicacionPersistente();
 }
 
@@ -89,10 +151,8 @@ function verificarSesion() {
   } else {
     panelLogin.hidden = false;
     panelMapas.hidden = true;
-    agregarOpciones(region, Object.keys(datos));
   }
 }
-
 
 // --- LÓGICA DE SELECTORES Y MAPAS ---
 function limpiarSelect(select) {
@@ -101,7 +161,6 @@ function limpiarSelect(select) {
 }
 
 function agregarOpciones(select, opciones) {
-  // Evitar duplicados al inicializar o recargar
   select.innerHTML = '<option value="">Seleccione...</option>';
   opciones.forEach(opcion => {
     const elemento = document.createElement("option");
@@ -109,60 +168,32 @@ function agregarOpciones(select, opciones) {
     elemento.textContent = opcion;
     select.appendChild(elemento);
   });
-
   select.disabled = false;
 }
 
-// Cambio de región
 region.addEventListener("change", () => {
   limpiarSelect(provincia);
   limpiarSelect(distrito);
   limpiarSelect(lugar);
   mensaje.textContent = "Seleccione una ubicación.";
-
-  if (region.value) {
-    agregarOpciones(
-      provincia,
-      Object.keys(datos[region.value])
-    );
-  }
+  if (region.value) agregarOpciones(provincia, Object.keys(datos[region.value]));
 });
 
-// Cambio de provincia
 provincia.addEventListener("change", () => {
   limpiarSelect(distrito);
   limpiarSelect(lugar);
   mensaje.textContent = "Seleccione una ubicación.";
-
-  if (provincia.value) {
-    agregarOpciones(
-      distrito,
-      Object.keys(datos[region.value][provincia.value])
-    );
-  }
+  if (provincia.value) agregarOpciones(distrito, Object.keys(datos[region.value][provincia.value]));
 });
 
-// Cambio de distrito
 distrito.addEventListener("change", () => {
   limpiarSelect(lugar);
   mensaje.textContent = "Seleccione una ubicación.";
-
-  if (distrito.value) {
-    agregarOpciones(
-      lugar,
-      datos[region.value][provincia.value][distrito.value]
-    );
-  }
+  if (distrito.value) agregarOpciones(lugar, datos[region.value][provincia.value][distrito.value]);
 });
 
-// Guardar ubicación y abrir el mapa correspondiente
 guardar.addEventListener("click", () => {
-  if (
-    !region.value ||
-    !provincia.value ||
-    !distrito.value ||
-    !lugar.value
-  ) {
+  if (!region.value || !provincia.value || !distrito.value || !lugar.value) {
     mensaje.textContent = "Complete toda la ubicación.";
     return;
   }
@@ -174,62 +205,36 @@ guardar.addEventListener("click", () => {
     lugar: lugar.value
   };
 
-  try {
-    localStorage.setItem(
-      "ubicacionHOSTOLD",
-      JSON.stringify(ubicacion)
-    );
-  } catch (error) {
-    // Continuar si LocalStorage está deshabilitado
-  }
+  try { localStorage.setItem("ubicacionHOSTOLD", JSON.stringify(ubicacion)); } catch (e) {}
 
   const tituloVisor = visorMapa.querySelector(".visor-contenido h2");
 
   if (lugar.value === "Colegio Salesiano Santa Rosa") {
     mensaje.textContent = "Abriendo el mapa del colegio...";
-
     if (tituloVisor) tituloVisor.textContent = "Mapa del Colegio Salesiano Santa Rosa";
-    
     errorImagen.hidden = true;
     imagenMapa.alt = "Mapa del Colegio Salesiano Santa Rosa";
     imagenMapa.src = mapaSalesiano;
-
     descargarMapa.href = mapaSalesiano;
     descargarMapa.download = mapaSalesiano;
-
     visorMapa.classList.add("activo");
     visorMapa.setAttribute("aria-hidden", "false");
-
   } else if (lugar.value === "Open Plaza Huancayo") {
     mensaje.textContent = "Abriendo plano de evacuación...";
-
     if (tituloVisor) tituloVisor.textContent = "Plano de Evacuación - Open Plaza Huancayo (Piso 1)";
-
     errorImagen.hidden = true;
     imagenMapa.alt = "Plano de Evacuación Open Plaza Huancayo Piso 1";
     imagenMapa.src = mapaOpenPlaza;
-
     descargarMapa.href = mapaOpenPlaza;
     descargarMapa.download = mapaOpenPlaza;
-
     visorMapa.classList.add("activo");
     visorMapa.setAttribute("aria-hidden", "false");
   }
 });
 
-// Detectar si no se encuentra la imagen
-imagenMapa.addEventListener("load", () => {
-  errorImagen.hidden = true;
-  mensaje.textContent = "Mapa cargado correctamente.";
-});
+imagenMapa.addEventListener("load", () => { errorImagen.hidden = true; mensaje.textContent = "Mapa cargado correctamente."; });
+imagenMapa.addEventListener("error", () => { errorImagen.hidden = false; mensaje.textContent = "No se encontró la imagen. Revisa su nombre en GitHub."; });
 
-imagenMapa.addEventListener("error", () => {
-  errorImagen.hidden = false;
-  mensaje.textContent =
-    "No se encontró la imagen. Revisa su nombre en GitHub.";
-});
-
-// Cerrar el visor
 function cerrarVisor() {
   visorMapa.classList.remove("activo");
   visorMapa.setAttribute("aria-hidden", "true");
@@ -237,39 +242,23 @@ function cerrarVisor() {
 }
 
 cerrarMapa.addEventListener("click", cerrarVisor);
+visorMapa.addEventListener("click", e => { if (e.target === visorMapa) cerrarVisor(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && visorMapa.classList.contains("activo")) cerrarVisor(); });
 
-visorMapa.addEventListener("click", evento => {
-  if (evento.target === visorMapa) {
-    cerrarVisor();
-  }
-});
-
-document.addEventListener("keydown", evento => {
-  if (evento.key === "Escape" &&
-      visorMapa.classList.contains("activo")) {
-    cerrarVisor();
-  }
-});
-
-// Cargar ubicación guardada automáticamente al iniciar
 function cargarUbicacionPersistente() {
   try {
     const datosGuardados = localStorage.getItem("ubicacionHOSTOLD");
     if (!datosGuardados) return;
-
     const ubicacion = JSON.parse(datosGuardados);
 
     if (ubicacion.region && datos[ubicacion.region]) {
       region.value = ubicacion.region;
-      
       agregarOpciones(provincia, Object.keys(datos[ubicacion.region]));
       if (ubicacion.provincia && datos[ubicacion.region][ubicacion.provincia]) {
         provincia.value = ubicacion.provincia;
-
         agregarOpciones(distrito, Object.keys(datos[ubicacion.region][ubicacion.provincia]));
         if (ubicacion.distrito && datos[ubicacion.region][ubicacion.provincia][ubicacion.distrito]) {
           distrito.value = ubicacion.distrito;
-
           agregarOpciones(lugar, datos[ubicacion.region][ubicacion.provincia][ubicacion.distrito]);
           if (ubicacion.lugar && datos[ubicacion.region][ubicacion.provincia][ubicacion.distrito].includes(ubicacion.lugar)) {
             lugar.value = ubicacion.lugar;
@@ -278,10 +267,7 @@ function cargarUbicacionPersistente() {
         }
       }
     }
-  } catch (error) {
-    // Evita romper la app si el localStorage está corrupto
-  }
+  } catch (e) {}
 }
 
-// Arrancar validando accesos
 verificarSesion();
