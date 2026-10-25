@@ -1,12 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const datos = { "Junín": { "Huancayo": { "Huancayo": ["Colegio Salesiano Santa Rosa", "Open Plaza Huancayo"] } } };
+  const datos = { "Junín": { "Huancayo": { "Huancayo": ["Colegio Salesiano Santa Rosa", "Open Plaza Huancayo", "I.E. 31554 José Carlos Mariátegui"] } } };
   const region = document.getElementById("region"), provincia = document.getElementById("provincia"), distrito = document.getElementById("distrito"), lugar = document.getElementById("lugar");
   const guardar = document.getElementById("guardar"), mensaje = document.getElementById("mensaje"), panelAuth = document.getElementById("panelAuth"), panelMapas = document.getElementById("panelMapas");
   const tabLogin = document.getElementById("tabLogin"), tabRegistro = document.getElementById("tabRegistro"), formLogin = document.getElementById("formLogin"), formRegistro = document.getElementById("formRegistro"), mensajeAuth = document.getElementById("mensajeAuth");
   const loginUsuario = document.getElementById("loginUsuario"), loginPassword = document.getElementById("loginPassword"), btnIngresar = document.getElementById("btnIngresar");
   const regUsuario = document.getElementById("regUsuario"), regPassword = document.getElementById("regPassword"), regConfirmarPassword = document.getElementById("regConfirmarPassword"), btnRegistrar = document.getElementById("btnRegistrar");
   const visorMapa = document.getElementById("visorMapa"), cerrarMapa = document.getElementById("cerrarMapa"), imagenMapa = document.getElementById("imagenMapa"), descargarMapa = document.getElementById("descargarMapa"), errorImagen = document.getElementById("errorImagen");
-  const mapaSalesiano = "IMG-20261001-WA0020.jpg", mapaOpenPlaza = "image_35840f16.jpg";
+  const selectorPisos = document.getElementById("selectorPisos"), btnPiso1 = document.getElementById("btnPiso1"), btnPiso2 = document.getElementById("btnPiso2");
+
+  const mapasConfig = {
+    "Colegio Salesiano Santa Rosa": { alt: "Mapa del Colegio Salesiano Santa Rosa", pisos: { 1: "IMG-20261001-WA0020.jpg" } },
+    "Open Plaza Huancayo": { alt: "Plano de Evacuación - Open Plaza Huancayo (Piso 1)", pisos: { 1: "image_35840f16.jpg" } },
+    "I.E. 31554 José Carlos Mariátegui": { alt: "Plano de Evacuación - I.E. Mariátegui", pisos: { 1: "mariategui_piso1.jpg", 2: "mariategui_piso2.jpg" } }
+  };
+  let mapaActual = null;
 
   function alternarPestanas(loginActivo) {
     tabLogin.classList.toggle("activa", loginActivo); tabRegistro.classList.toggle("activa", !loginActivo);
@@ -56,18 +63,25 @@ document.addEventListener("DOMContentLoaded", () => {
   if (provincia) provincia.addEventListener("change", () => { limpiarSelect(distrito); limpiarSelect(lugar); if (provincia.value) agregarOpciones(distrito, Object.keys(datos[region.value][provincia.value])); });
   if (distrito) distrito.addEventListener("change", () => { limpiarSelect(lugar); if (distrito.value) agregarOpciones(lugar, datos[region.value][provincia.value][distrito.value]); });
 
-  if (guardar) guardar.addEventListener("click", () => {
-    if (!region.value || !provincia.value || !distrito.value || !lugar.value) return mensaje.textContent = "Complete la ubicación.";
-    try { localStorage.setItem("ubicacionHOSTOLD", JSON.stringify({ region: region.value, provincia: provincia.value, distrito: distrito.value, lugar: lugar.value })); } catch(e){}
-    const tit = visorMapa.querySelector(".visor-contenido h2");
-    if (lugar.value === "Colegio Salesiano Santa Rosa") { abrirMapa(mapaSalesiano, "Mapa del Colegio Salesiano Santa Rosa", tit); }
-    else if (lugar.value === "Open Plaza Huancayo") { abrirMapa(mapaOpenPlaza, "Plano de Evacuación - Open Plaza Huancayo (Piso 1)", tit); }
-  });
-
-  function abrirMapa(src, alt, titEv) {
-    errorImagen.hidden = true; imagenMapa.alt = alt; imagenMapa.src = src; descargarMapa.href = src; descargarMapa.download = src;
-    if (titEv) titEv.textContent = alt; visorMapa.classList.add("activo"); visorMapa.setAttribute("aria-hidden", "false");
+  function cambiarPiso(num) {
+    if (!mapaActual || !mapaActual.pisos[num]) return;
+    btnPiso1.classList.toggle("activa", num === 1); btnPiso2.classList.toggle("activa", num === 2);
+    errorImagen.hidden = true; imagenMapa.src = mapaActual.pisos[num]; descargarMapa.href = mapaActual.pisos[num]; descargarMapa.download = mapaActual.pisos[num];
   }
+  if (btnPiso1) btnPiso1.addEventListener("click", () => cambiarPiso(1));
+  if (btnPiso2) btnPiso2.addEventListener("click", () => cambiarPiso(2));
+
+  if (guardar) guardar.addEventListener("click", () => {
+    const lg = lugar.value;
+    if (!region.value || !provincia.value || !distrito.value || !lg) return mensaje.textContent = "Complete la ubicación.";
+    try { localStorage.setItem("ubicacionHOSTOLD", JSON.stringify({ region: region.value, provincia: provincia.value, distrito: distrito.value, lugar: lg })); } catch(e){}
+    if (mapasConfig[lg]) {
+      mapaActual = mapasConfig[lg]; mensaje.textContent = "Abriendo plano...";
+      const tit = visorMapa.querySelector(".visor-contenido h2"); if (tit) tit.textContent = mapaActual.alt;
+      selectorPisos.hidden = Object.keys(mapaActual.pisos).length <= 1;
+      cambiarPiso(1); visorMapa.classList.add("activo"); visorMapa.setAttribute("aria-hidden", "false");
+    }
+  });
 
   if (imagenMapa) imagenMapa.addEventListener("load", () => { errorImagen.hidden = true; mensaje.textContent = "Mapa cargado correctamente."; });
   if (imagenMapa) imagenMapa.addEventListener("error", () => { errorImagen.hidden = false; imagenMapa.removeAttribute("src"); mensaje.textContent = "Error al cargar la imagen en GitHub."; });
@@ -87,6 +101,5 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch(e){}
   }
-
   if (sessionStorage.getItem("sesionHOSTOLD") === "activa") { mostrarBuscador(); } else { panelAuth.hidden = false; panelMapas.hidden = true; }
 });
