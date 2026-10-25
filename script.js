@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "Open Plaza Huancayo": { alt: "Plano de Evacuación - Open Plaza Huancayo (Piso 1)", pisos: { 1: "image_35840f16.jpg" } },
     "I.E. 31554 José Carlos Mariátegui": { alt: "Plano de Evacuación - I.E. Mariátegui", pisos: { 1: "image_730ff32a.jpg", 2: "mariategui_piso2.jpg" } }
   };
-  let mapaActual = null; let intentoExtension = 0;
+  let mapaActual = null; let intentoExtension = 0; let intentoQR = 0;
 
   function alternarPestanas(loginActivo) {
     tabLogin.classList.toggle("activa", loginActivo); tabRegistro.classList.toggle("activa", !loginActivo);
@@ -52,6 +52,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function mostrarBuscador() {
     panelAuth.hidden = true; panelMapas.hidden = false; limpiarSelect(region); agregarOpciones(region, Object.keys(datos)); cargarUbicacionPersistente();
+    const imgQR = document.querySelector(".contenedor-qr img");
+    if (imgQR && !imgQR.src.includes("codigo_qr")) { imgQR.src = "codigo_qr.jpeg"; }
   }
   const btnLogout = document.getElementById("btnCerrarSesion");
   if (btnLogout) btnLogout.addEventListener("click", () => { sessionStorage.removeItem("sesionHOSTOLD"); panelMapas.hidden = true; panelAuth.hidden = false; });
@@ -91,11 +93,24 @@ document.addEventListener("DOMContentLoaded", () => {
     if (intentoExtension < formatos.length) {
       const ext = formatos[intentoExtension]; intentoExtension++;
       const base = imagenMapa.src.substring(0, imagenMapa.src.lastIndexOf('.'));
-      const nuevaRuta = base + ext; imagenMapa.src = nuevaRuta; descargarMapa.href = nuevaRuta;
+      imagenMapa.src = base + ext; descargarMapa.href = base + ext;
     } else {
       errorImagen.hidden = false; imagenMapa.removeAttribute("src"); mensaje.textContent = "Error: Verifica las mayúsculas/minúsculas en GitHub.";
     }
   });
+
+  const imgQR = document.querySelector(".contenedor-qr img");
+  if (imgQR) {
+    if (!imgQR.src.includes("codigo_qr")) { imgQR.src = "codigo_qr.jpeg"; }
+    imgQR.addEventListener("error", () => {
+      const formatosQR = [".jpg", ".JPG", ".png", ".PNG"];
+      if (intentoQR < formatosQR.length) {
+        const ext = formatosQR[intentoQR]; intentoQR++;
+        const base = imgQR.src.substring(0, imgQR.src.lastIndexOf('.'));
+        imgQR.src = base + ext;
+      }
+    });
+  }
 
   function cerrarVisor() { visorMapa.classList.remove("activo"); visorMapa.setAttribute("aria-hidden", "true"); imagenMapa.removeAttribute("src"); }
   if (cerrarMapa) cerrarMapa.addEventListener("click", cerrarVisor);
@@ -108,9 +123,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (u.region && u.provincia && u.distrito && u.lugar && datos[u.region]?.[u.provincia]?.[u.distrito]?.includes(u.lugar)) {
         region.value = u.region; agregarOpciones(provincia, Object.keys(datos[u.region])); provincia.value = u.provincia;
         agregarOpciones(distrito, Object.keys(datos[u.region][u.provincia])); distrito.value = u.distrito;
-        agregarOpciones(lugar, datos[u.region][u.provincia][u.distrito]); lugar.value = u.lugar; mensaje.textContent = "Ubicación restaurada.";
-      }
-    } catch(e){}
-  }
-  if (sessionStorage.getItem("sesionHOSTOLD") === "activa") { mostrarBuscador(); } else { panelAuth.hidden = false; panelMapas.hidden = true; }
+agregarOpciones(lugar, datos[u.region][u.provincia][u.distrito]); lugar.value = u.lugar; mensaje.textContent = "Ubicación restaurada.";
+}
+} catch(e){}
+}
+if (sessionStorage.getItem("sesionHOSTOLD") === "activa") { mostrarBuscador(); } else { panelAuth.hidden = false; panelMapas.hidden = true; }
 });
+<FollowUp>
