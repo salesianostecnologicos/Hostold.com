@@ -1,3 +1,4 @@
+
 const datos = {
   "Junín": {
     "Huancayo": {
@@ -8,37 +9,50 @@ const datos = {
   }
 };
 
+// Elementos de ubicación
 const region = document.getElementById("region");
 const provincia = document.getElementById("provincia");
 const distrito = document.getElementById("distrito");
 const lugar = document.getElementById("lugar");
+
 const guardar = document.getElementById("guardar");
 const mensaje = document.getElementById("mensaje");
 
+// Elementos del mapa
 const visorMapa = document.getElementById("visorMapa");
 const cerrarMapa = document.getElementById("cerrarMapa");
 const imagenMapa = document.getElementById("imagenMapa");
 const descargarMapa = document.getElementById("descargarMapa");
 
+// Nombre exacto del archivo del mapa
+const nombreMapa =
+  "Gemini_Generated_Image_n2uqnfn2uqnfn2uq.jpeg";
+
+// Limpiar un selector
 function limpiarSelect(select) {
-  select.innerHTML = '<option value="">Seleccione...</option>';
+  select.innerHTML =
+    '<option value="">Seleccione...</option>';
   select.disabled = true;
 }
 
+// Añadir opciones a un selector
 function agregarOpciones(select, opciones) {
   opciones.forEach(opcion => {
-    const option = document.createElement("option");
-    option.value = opcion;
-    option.textContent = opcion;
-    select.appendChild(option);
+    const elemento = document.createElement("option");
+
+    elemento.value = opcion;
+    elemento.textContent = opcion;
+
+    select.appendChild(elemento);
   });
 
   select.disabled = false;
 }
 
-// Cargar regiones
+// Cargar las regiones disponibles
 agregarOpciones(region, Object.keys(datos));
 
+// Seleccionar región
 region.addEventListener("change", () => {
   limpiarSelect(provincia);
   limpiarSelect(distrito);
@@ -54,6 +68,7 @@ region.addEventListener("change", () => {
   }
 });
 
+// Seleccionar provincia
 provincia.addEventListener("change", () => {
   limpiarSelect(distrito);
   limpiarSelect(lugar);
@@ -68,6 +83,7 @@ provincia.addEventListener("change", () => {
   }
 });
 
+// Seleccionar distrito
 distrito.addEventListener("change", () => {
   limpiarSelect(lugar);
 
@@ -81,8 +97,8 @@ distrito.addEventListener("change", () => {
   }
 });
 
+// Guardar ubicación y abrir el mapa
 guardar.addEventListener("click", () => {
-
   if (
     !region.value ||
     !provincia.value ||
@@ -109,11 +125,8 @@ guardar.addEventListener("click", () => {
     `Ubicación guardada: ${lugar.value}`;
 
   if (lugar.value === "Colegio Salesiano Santa Rosa") {
-
-    const nombreMapa =
-      "Gemini_Generated_Image_n2uqnfn2uqnfn2uq.jpeg";
-
     imagenMapa.src = nombreMapa;
+
     imagenMapa.alt =
       "Mapa del Colegio Salesiano Santa Rosa";
 
@@ -127,17 +140,15 @@ guardar.addEventListener("click", () => {
 });
 
 // Cerrar el mapa
-cerrarMapa.addEventListener("click", () => {
+function cerrarVisor() {
   visorMapa.classList.remove("activo");
-  imagenMapa.src = "";
-});
+}
 
-// Cerrar haciendo clic fuera del mapa
-visorMapa.addEventListener("click", (evento) => {
+cerrarMapa.addEventListener("click", cerrarVisor);
 
+// Cerrar al pulsar fuera del mapa
+visorMapa.addEventListener("click", evento => {
   if (evento.target === visorMapa) {
-    visorMapa.classList.remove("activo");
-    imagenMapa.src = "";
+    cerrarVisor();
   }
-
 });
