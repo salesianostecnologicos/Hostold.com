@@ -9,7 +9,6 @@ const datos = {
   }
 };
 
-// Elementos de ubicación
 const region = document.getElementById("region");
 const provincia = document.getElementById("provincia");
 const distrito = document.getElementById("distrito");
@@ -18,46 +17,38 @@ const lugar = document.getElementById("lugar");
 const guardar = document.getElementById("guardar");
 const mensaje = document.getElementById("mensaje");
 
-// Elementos del mapa
 const visorMapa = document.getElementById("visorMapa");
 const cerrarMapa = document.getElementById("cerrarMapa");
 const imagenMapa = document.getElementById("imagenMapa");
 const descargarMapa = document.getElementById("descargarMapa");
+const errorImagen = document.getElementById("errorImagen");
 
-// Nombre exacto del archivo del mapa
-const nombreMapa =
-  "Gemini_Generated_Image_n2uqnfn2uqnfn2uq.jpeg";
+const nombreMapa = "IMG-20261001-WA0020.jpg";
 
-// Limpiar un selector
 function limpiarSelect(select) {
-  select.innerHTML =
-    '<option value="">Seleccione...</option>';
+  select.innerHTML = '<option value="">Seleccione...</option>';
   select.disabled = true;
 }
 
-// Añadir opciones a un selector
 function agregarOpciones(select, opciones) {
   opciones.forEach(opcion => {
     const elemento = document.createElement("option");
-
     elemento.value = opcion;
     elemento.textContent = opcion;
-
     select.appendChild(elemento);
   });
 
   select.disabled = false;
 }
 
-// Cargar las regiones disponibles
+// Cargar regiones
 agregarOpciones(region, Object.keys(datos));
 
-// Seleccionar región
+// Cambio de región
 region.addEventListener("change", () => {
   limpiarSelect(provincia);
   limpiarSelect(distrito);
   limpiarSelect(lugar);
-
   mensaje.textContent = "Seleccione una ubicación.";
 
   if (region.value) {
@@ -68,11 +59,10 @@ region.addEventListener("change", () => {
   }
 });
 
-// Seleccionar provincia
+// Cambio de provincia
 provincia.addEventListener("change", () => {
   limpiarSelect(distrito);
   limpiarSelect(lugar);
-
   mensaje.textContent = "Seleccione una ubicación.";
 
   if (provincia.value) {
@@ -83,10 +73,9 @@ provincia.addEventListener("change", () => {
   }
 });
 
-// Seleccionar distrito
+// Cambio de distrito
 distrito.addEventListener("change", () => {
   limpiarSelect(lugar);
-
   mensaje.textContent = "Seleccione una ubicación.";
 
   if (distrito.value) {
@@ -116,39 +105,63 @@ guardar.addEventListener("click", () => {
     lugar: lugar.value
   };
 
-  localStorage.setItem(
-    "ubicacionHOSTOLD",
-    JSON.stringify(ubicacion)
-  );
-
-  mensaje.textContent =
-    `Ubicación guardada: ${lugar.value}`;
+  try {
+    localStorage.setItem(
+      "ubicacionHOSTOLD",
+      JSON.stringify(ubicacion)
+    );
+  } catch (error) {
+    // La página seguirá funcionando aunque el navegador
+    // no permita guardar la ubicación localmente.
+  }
 
   if (lugar.value === "Colegio Salesiano Santa Rosa") {
+    mensaje.textContent = "Abriendo el mapa del colegio...";
+
+    errorImagen.hidden = true;
+    imagenMapa.alt = "Mapa del Colegio Salesiano Santa Rosa";
     imagenMapa.src = nombreMapa;
 
-    imagenMapa.alt =
-      "Mapa del Colegio Salesiano Santa Rosa";
-
     descargarMapa.href = nombreMapa;
-
-    descargarMapa.download =
-      "Hostold-Colegio-Salesiano-Santa-Rosa.jpeg";
+    descargarMapa.download = nombreMapa;
 
     visorMapa.classList.add("activo");
+    visorMapa.setAttribute("aria-hidden", "false");
   }
 });
 
-// Cerrar el mapa
+// Detectar si no se encuentra la imagen
+imagenMapa.addEventListener("load", () => {
+  errorImagen.hidden = true;
+  mensaje.textContent = "Mapa cargado correctamente.";
+});
+
+imagenMapa.addEventListener("error", () => {
+  errorImagen.hidden = false;
+  mensaje.textContent =
+    "No se encontró la imagen. Revisa su nombre en GitHub.";
+});
+
+// Cerrar el visor
 function cerrarVisor() {
   visorMapa.classList.remove("activo");
+  visorMapa.setAttribute("aria-hidden", "true");
+  imagenMapa.removeAttribute("src");
 }
 
 cerrarMapa.addEventListener("click", cerrarVisor);
 
-// Cerrar al pulsar fuera del mapa
+// Cerrar al pulsar fuera del contenido
 visorMapa.addEventListener("click", evento => {
   if (evento.target === visorMapa) {
+    cerrarVisor();
+  }
+});
+
+// Cerrar con Escape
+document.addEventListener("keydown", evento => {
+  if (evento.key === "Escape" &&
+      visorMapa.classList.contains("activo")) {
     cerrarVisor();
   }
 });
