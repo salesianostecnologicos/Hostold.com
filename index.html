@@ -100,6 +100,13 @@
     <section class="visor-contenido" role="dialog" aria-modal="true" aria-label="Mapa del lugar">
       <button id="cerrarMapa" class="cerrar-mapa" type="button" aria-label="Cerrar mapa">×</button>
       <h2>Mapa de Accesibilidad</h2>
+      
+      <!-- Selector de Pisos Dinámico -->
+      <div id="selectorPisos" class="contenedor-pisos" hidden>
+        <button id="btnPiso1" class="btn-piso activo" type="button">1er Piso</button>
+        <button id="btnPiso2" class="btn-piso" type="button">2do Piso</button>
+      </div>
+
       <img id="imagenMapa" src="" alt="Mapa del lugar">
       <p id="errorImagen" class="error-imagen" hidden>No se pudo cargar el mapa. Comprueba el nombre del archivo.</p>
       <a id="descargarMapa" class="boton-descargar" href="#" download>Descargar mapa</a>
