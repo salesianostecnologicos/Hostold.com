@@ -1,283 +1,89 @@
-const datos = {
-  "Junín": {
-    "Huancayo": {
-      "Huancayo": [
-        "Colegio Salesiano Santa Rosa",
-        "Open Plaza Huancayo"
-      ]
-    }
-  }
-};
+const datos = { "Junín": { "Huancayo": { "Huancayo": ["Colegio Salesiano Santa Rosa", "Open Plaza Huancayo"] } } };
+const region = document.getElementById("region"), provincia = document.getElementById("provincia"), distrito = document.getElementById("distrito"), lugar = document.getElementById("lugar");
+const guardar = document.getElementById("guardar"), mensaje = document.getElementById("mensaje"), panelAuth = document.getElementById("panelAuth"), panelMapas = document.getElementById("panelMapas");
+const tabLogin = document.getElementById("tabLogin"), tabRegistro = document.getElementById("tabRegistro"), formLogin = document.getElementById("formLogin"), formRegistro = document.getElementById("formRegistro"), mensajeAuth = document.getElementById("mensajeAuth");
+const loginUsuario = document.getElementById("loginUsuario"), loginPassword = document.getElementById("loginPassword"), btnIngresar = document.getElementById("btnIngresar");
+const regUsuario = document.getElementById("regUsuario"), regPassword = document.getElementById("regPassword"), regConfirmarPassword = document.getElementById("regConfirmarPassword"), btnRegistrar = document.getElementById("btnRegistrar");
+const visorMapa = document.getElementById("visorMapa"), cerrarMapa = document.getElementById("cerrarMapa"), imagenMapa = document.getElementById("imagenMapa"), descargarMapa = document.getElementById("descargarMapa"), errorImagen = document.getElementById("errorImagen");
+const mapaSalesiano = "IMG-20261001-WA0020.jpg", mapaOpenPlaza = "image_35840f16.jpg";
 
-// --- Elementos de Control del Panel Auth ---
-const panelAuth = document.getElementById("panelAuth");
-const panelMapas = document.getElementById("panelMapas");
-const tabLogin = document.getElementById("tabLogin");
-const tabRegistro = document.getElementById("tabRegistro");
-const formLogin = document.getElementById("formLogin");
-const formRegistro = document.getElementById("formRegistro");
-const mensajeAuth = document.getElementById("mensajeAuth");
-const btnCerrarSesion = document.getElementById("btnCerrarSesion");
+function alternarPestanas(loginActivo) {
+  tabLogin.classList.toggle("activa", loginActivo); tabRegistro.classList.toggle("activa", !loginActivo);
+  formLogin.hidden = !loginActivo; formRegistro.hidden = loginActivo; mensajeAuth.textContent = "";
+}
+tabLogin.addEventListener("click", () => alternarPestanas(true));
+tabRegistro.addEventListener("click", () => alternarPestanas(false));
 
-// --- Inputs del Formulario Login ---
-const loginUsuario = document.getElementById("loginUsuario");
-const loginPassword = document.getElementById("loginPassword");
-const btnIngresar = document.getElementById("btnIngresar");
-
-// --- Inputs del Formulario Registro ---
-const regUsuario = document.getElementById("regUsuario");
-const regPassword = document.getElementById("regPassword");
-const regConfirmarPassword = document.getElementById("regConfirmarPassword");
-const btnRegistrar = document.getElementById("btnRegistrar");
-
-// --- Elementos del Buscador de Ubicaciones ---
-const region = document.getElementById("region");
-const provincia = document.getElementById("provincia");
-const distrito = document.getElementById("distrito");
-const lugar = document.getElementById("lugar");
-const guardar = document.getElementById("guardar");
-const mensaje = document.getElementById("mensaje");
-
-// --- Elementos del Visor de Mapa ---
-const visorMapa = document.getElementById("visorMapa");
-const cerrarMapa = document.getElementById("cerrarMapa");
-const imagenMapa = document.getElementById("imagenMapa");
-const descargarMapa = document.getElementById("descargarMapa");
-const errorImagen = document.getElementById("errorImagen");
-
-// Rutas de archivos correspondientes
-const mapaSalesiano = "IMG-20261001-WA0020.jpg";
-const mapaOpenPlaza = "image_35840f16.jpg";
-
-// --- CONTROL DE PESTAÑAS INTERNAS ---
-tabLogin.addEventListener("click", () => {
-  tabLogin.classList.add("activa");
-  tabRegistro.classList.remove("activa");
-  formLogin.hidden = false;
-  formRegistro.hidden = true;
-  mensajeAuth.textContent = "";
-  mensajeAuth.style.color = "#ff8b8b";
-});
-
-tabRegistro.addEventListener("click", () => {
-  tabRegistro.classList.add("activa");
-  tabLogin.classList.remove("activa");
-  formLogin.hidden = true;
-  formRegistro.hidden = false;
-  mensajeAuth.textContent = "";
-  mensajeAuth.style.color = "#ff8b8b";
-});
-
-// --- ACCIÓN: INICIAR SESIÓN ---
+function ejecutarLogin() {
+  const u = loginUsuario.value.trim().toLowerCase(), p = loginPassword.value;
+  if (!u || !p) return mensajeAuth.textContent = "Llene todos los campos.";
+  let db = JSON.parse(localStorage.getItem("usuariosHOSTOLD")) || {}; db["admin"] = "1234";
+  if (db[u] && db[u] === p) { sessionStorage.setItem("sesionHOSTOLD", "activa"); mostrarBuscador(); }
+  else { mensajeAuth.textContent = "Usuario o contraseña incorrectos."; }
+}
 btnIngresar.addEventListener("click", ejecutarLogin);
-
-// Escuchar tecla Enter en el formulario de Login
 loginUsuario.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarLogin(); });
 loginPassword.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarLogin(); });
 
-function ejecutarLogin() {
-  const user = loginUsuario.value.trim().toLowerCase();
-  const pass = loginPassword.value;
-
-  if (!user || !pass) {
-    mensajeAuth.style.color = "#ff8b8b";
-    mensajeAuth.textContent = "Por favor, llene todos los campos.";
-    return;
-  }
-
-  let dbUsuarios = JSON.parse(localStorage.getItem("usuariosHOSTOLD")) || {};
-  dbUsuarios["admin"] = "1234"; // Cuenta por defecto de respaldo
-
-  if (dbUsuarios[user] && dbUsuarios[user] === pass) {
-    sessionStorage.setItem("sesionHOSTOLD", "activa");
-    mensajeAuth.textContent = "";
-    loginUsuario.value = "";
-    loginPassword.value = "";
-    mostrarBuscador();
-  } else {
-    mensajeAuth.style.color = "#ff8b8b";
-    mensajeAuth.textContent = "Usuario o contraseña incorrectos.";
-  }
+function ejecutarRegistro() {
+  const u = regUsuario.value.trim().toLowerCase(), p = regPassword.value, cp = regConfirmarPassword.value;
+  if (!u || !p || !cp) return mensajeAuth.textContent = "Complete todos los campos.";
+  let db = JSON.parse(localStorage.getItem("usuariosHOSTOLD")) || {}; db["admin"] = "1234";
+  if (db[u]) return mensajeAuth.textContent = "El usuario ya existe.";
+  if (p.length < 4) return mensajeAuth.textContent = "Mínimo 4 caracteres.";
+  if (p !== cp) return mensajeAuth.textContent = "Las contraseñas no coinciden.";
+  db[u] = p; localStorage.setItem("usuariosHOSTOLD", JSON.stringify(db));
+  regUsuario.value = ""; regPassword.value = ""; regConfirmarPassword.value = "";
+  mensajeAuth.style.color = "#00ffaa"; mensajeAuth.textContent = "¡Registro exitoso! Redirigiendo...";
+  setTimeout(() => { mensajeAuth.style.color = "#ff8b8b"; alternarPestanas(true); loginUsuario.value = u; }, 1500);
 }
-
-// --- ACCIÓN: REGISTRARSE ---
 btnRegistrar.addEventListener("click", ejecutarRegistro);
-
-// Escuchar tecla Enter en el formulario de Registro
 regUsuario.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarRegistro(); });
 regPassword.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarRegistro(); });
 regConfirmarPassword.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarRegistro(); });
 
-function ejecutarRegistro() {
-  const user = regUsuario.value.trim().toLowerCase();
-  const pass = regPassword.value;
-  const confirmPass = regConfirmarPassword.value;
-
-  if (!user || !pass || !confirmPass) {
-    mensajeAuth.style.color = "#ff8b8b";
-    mensajeAuth.textContent = "Complete todos los campos del registro.";
-    return;
-  }
-
-  let dbUsuarios = JSON.parse(localStorage.getItem("usuariosHOSTOLD")) || {};
-  dbUsuarios["admin"] = "1234";
-
-  if (dbUsuarios[user]) {
-    mensajeAuth.style.color = "#ff8b8b";
-    mensajeAuth.textContent = "Este nombre de usuario ya existe.";
-    return;
-  }
-
-  if (pass.length < 4) {
-    mensajeAuth.style.color = "#ff8b8b";
-    mensajeAuth.textContent = "La contraseña debe tener mínimo 4 caracteres.";
-    return;
-  }
-
-  if (pass !== confirmPass) {
-    mensajeAuth.style.color = "#ff8b8b";
-    mensajeAuth.textContent = "Las contraseñas no coinciden.";
-    return;
-  }
-
-  // Guardar en el almacenamiento del navegador
-  dbUsuarios[user] = pass;
-  localStorage.setItem("usuariosHOSTOLD", JSON.stringify(dbUsuarios));
-
-  // Limpiar campos de registro
-  regUsuario.value = "";
-  regPassword.value = "";
-  regConfirmarPassword.value = "";
-
-  // Mostrar éxito en verde y regresar automáticamente al Login
-  mensajeAuth.style.color = "#00ffaa";
-  mensajeAuth.textContent = "¡Registro exitoso! Redirigiendo...";
-
-  setTimeout(() => {
-    tabLogin.click();
-    loginUsuario.value = user;
-  }, 1500);
-}
-
-// --- MANEJO DE VISTAS Y LOGOUT ---
 function mostrarBuscador() {
-  panelAuth.hidden = true;
-  panelMapas.hidden = false;
-  limpiarSelect(region);
-  agregarOpciones(region, Object.keys(datos));
-  cargarUbicacionPersistente();
+  panelAuth.hidden = true; panelMapas.hidden = false; limpiarSelect(region); agregarOpciones(region, Object.keys(datos)); cargarUbicacionPersistente();
 }
+document.getElementById("btnCerrarSesion").addEventListener("click", () => { sessionStorage.removeItem("sesionHOSTOLD"); panelMapas.hidden = true; panelAuth.hidden = false; });
 
-btnCerrarSesion.addEventListener("click", () => {
-  sessionStorage.removeItem("sesionHOSTOLD");
-  panelMapas.hidden = true;
-  panelAuth.hidden = false;
-  mensaje.textContent = "Seleccione una ubicación.";
-});
+function limpiarSelect(s) { s.innerHTML = '<option value="">Seleccione...</option>'; s.disabled = true; }
+function agregarOpciones(s, ops) { s.innerHTML = '<option value="">Seleccione...</option>'; ops.forEach(o => { const el = document.createElement("option"); el.value = o; el.textContent = o; s.appendChild(el); }); s.disabled = false; }
 
-function comprobarSesionActiva() {
-  const sesion = sessionStorage.getItem("sesionHOSTOLD");
-  if (sesion === "activa") {
-    mostrarBuscador();
-  } else {
-    panelAuth.hidden = false;
-    panelMapas.hidden = true;
-  }
-}
-
-// --- LOGICA DEL BUSCADOR DE UBICACIONES ---
-function limpiarSelect(select) {
-  select.innerHTML = '<option value="">Seleccione...</option>';
-  select.disabled = true;
-}
-
-function agregarOpciones(select, opciones) {
-  select.innerHTML = '<option value="">Seleccione...</option>';
-  opciones.forEach(opcion => {
-    const elemento = document.createElement("option");
-    elemento.value = opcion;
-    elemento.textContent = opcion;
-    select.appendChild(elemento);
-  });
-  select.disabled = false;
-}
-
-region.addEventListener("change", () => {
-  limpiarSelect(provincia);
-  limpiarSelect(distrito);
-  limpiarSelect(lugar);
-  mensaje.textContent = "Seleccione una ubicación.";
-  if (region.value) agregarOpciones(provincia, Object.keys(datos[region.value]));
-});
-
-provincia.addEventListener("change", () => {
-  limpiarSelect(distrito);
-  limpiarSelect(lugar);
-  mensaje.textContent = "Seleccione una ubicación.";
-  if (provincia.value) agregarOpciones(distrito, Object.keys(datos[region.value][provincia.value]));
-});
-
-distrito.addEventListener("change", () => {
-  limpiarSelect(lugar);
-  mensaje.textContent = "Seleccione una ubicación.";
-  if (distrito.value) agregarOpciones(lugar, datos[region.value][provincia.value][distrito.value]);
-});
+region.addEventListener("change", () => { limpiarSelect(provincia); limpiarSelect(distrito); limpiarSelect(lugar); if (region.value) agregarOpciones(provincia, Object.keys(datos[region.value])); });
+provincia.addEventListener("change", () => { limpiarSelect(distrito); limpiarSelect(lugar); if (provincia.value) agregarOpciones(distrito, Object.keys(datos[region.value][provincia.value])); });
+distrito.addEventListener("change", () => { limpiarSelect(lugar); if (distrito.value) agregarOpciones(lugar, datos[region.value][provincia.value][distrito.value]); });
 
 guardar.addEventListener("click", () => {
-  if (!region.value || !provincia.value || !distrito.value || !lugar.value) {
-    mensaje.textContent = "Complete toda la ubicación.";
-    return;
-  }
-
-  const ubicacion = {
-    region: region.value,
-    provincia: provincia.value,
-    distrito: distrito.value,
-    lugar: lugar.value
-  };
-
-  try { localStorage.setItem("ubicacionHOSTOLD", JSON.stringify(ubicacion)); } catch (e) {}
-
-  const tituloVisor = visorMapa.querySelector(".visor-contenido h2");
-
-  if (lugar.value === "Colegio Salesiano Santa Rosa") {
-    mensaje.textContent = "Abriendo el mapa del colegio...";
-    if (tituloVisor) tituloVisor.textContent = "Mapa del Colegio Salesiano Santa Rosa";
-    errorImagen.hidden = true;
-    imagenMapa.alt = "Mapa del Colegio Salesiano Santa Rosa";
-    imagenMapa.src = mapaSalesiano;
-    descargarMapa.href = mapaSalesiano;
-    descargarMapa.download = mapaSalesiano;
-    visorMapa.classList.add("activo");
-    visorMapa.setAttribute("aria-hidden", "false");
-  } else if (lugar.value === "Open Plaza Huancayo") {
-    mensaje.textContent = "Abriendo plano de evacuación...";
-    if (tituloVisor) tituloVisor.textContent = "Plano de Evacuación - Open Plaza Huancayo (Piso 1)";
-    errorImagen.hidden = true;
-    imagenMapa.alt = "Plano de Evacuación Open Plaza Huancayo Piso 1";
-    imagenMapa.src = mapaOpenPlaza;
-    descargarMapa.href = mapaOpenPlaza;
-    descargarMapa.download = mapaOpenPlaza;
-    visorMapa.classList.add("activo");
-    visorMapa.setAttribute("aria-hidden", "false");
-  }
+  if (!region.value || !provincia.value || !distrito.value || !lugar.value) return mensaje.textContent = "Complete la ubicación.";
+  try { localStorage.setItem("ubicacionHOSTOLD", JSON.stringify({ region: region.value, provincia: provincia.value, distrito: distrito.value, lugar: lugar.value })); } catch(e){}
+  const tit = visorMapa.querySelector(".visor-contenido h2");
+  if (lugar.value === "Colegio Salesiano Santa Rosa") { abrirMapa(mapaSalesiano, "Mapa del Colegio Salesiano Santa Rosa", tit); }
+  else if (lugar.value === "Open Plaza Huancayo") { abrirMapa(mapaOpenPlaza, "Plano de Evacuación - Open Plaza Huancayo (Piso 1)", tit); }
 });
 
-// Eventos de carga del mapa
-imagenMapa.addEventListener("load", () => { errorImagen.hidden = true; mensaje.textContent = "Mapa cargado correctamente."; });
-imagenMapa.addEventListener("error", () => { errorImagen.hidden = false; mensaje.textContent = "No se encontró la imagen. Revisa su nombre en GitHub."; });
-
-function cerrarVisor() {
-  visorMapa.classList.remove("activo");
-  visorMapa.setAttribute("aria-hidden", "true");
-  imagenMapa.removeAttribute("src");
+function abrirMapa(src, alt, titEv) {
+  errorImagen.hidden = true; imagenMapa.alt = alt; imagenMapa.src = src; descargarMapa.href = src; descargarMapa.download = src;
+  if (titEv) titEv.textContent = alt; visorMapa.classList.add("activo"); visorMapa.setAttribute("aria-hidden", "false");
 }
 
+imagenMapa.addEventListener("load", () => { errorImagen.hidden = true; mensaje.textContent = "Mapa cargado correctamente."; });
+imagenMapa.addEventListener("error", () => { errorImagen.hidden = false; imagenMapa.removeAttribute("src"); mensaje.textContent = "Error al cargar la imagen en GitHub."; });
+
+function cerrarVisor() { visorMapa.classList.remove("activo"); visorMapa.setAttribute("aria-hidden", "true"); imagenMapa.removeAttribute("src"); }
 cerrarMapa.addEventListener("click", cerrarVisor);
-visorMapa.addEventListener("click", e => { if (e.target === visorMapa) cerrarVisor(); });
-document.addEventListener("keydown", e => { if (e.key === "Escape" && visorMapa.classList.contains("activo")) cerrarVisor(); });
+visorMapa.addEventListener("click", (e) => { if (e.target === visorMapa) cerrarVisor(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && visorMapa.classList.contains("activo")) cerrarVisor(); });
 
 function cargarUbicacionPersistente() {
   try {
-    const datosGuardados = localStorage.getItem("ubicacionHOSTOLD");
-    if (!datosGuardados) return;
+    const g = localStorage.getItem("ubicacionHOSTOLD"); if (!g) return; const u = JSON.parse(g);
+    if (u.region && u.provincia && u.distrito && u.lugar && datos[u.region]?.[u.provincia]?.[u.distrito]?.includes(u.lugar)) {
+      region.value = u.region; agregarOpciones(provincia, Object.keys(datos[u.region])); provincia.value = u.provincia;
+      agregarOpciones(distrito, Object.keys(datos[u.region][u.provincia])); distrito.value = u.distrito;
+      agregarOpciones(lugar, datos[u.region][u.provincia][u.distrito]); lugar.value = u.lugar; mensaje.textContent = "Ubicación restaurada.";
+    }
+  } catch(e){}
+}
+
+if (sessionStorage.getItem("sesionHOSTOLD") === "activa") { mostrarBuscador(); } else { panelAuth.hidden = false; panelMapas.hidden = true; }
