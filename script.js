@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function ejecutarLogin() {
     const u = loginUsuario.value.trim().toLowerCase(), p = loginPassword.value;
-    if (!u || !p) return mensajeAuth.textContent = "Llene todos los campos.";
+    if (!u || !p) { mensajeAuth.textContent = "Llene todos los campos."; return; }
     let db = JSON.parse(localStorage.getItem("usuariosHOSTOLD")) || {}; db["admin"] = "1234";
     if (db[u] && db[u] === p) { sessionStorage.setItem("sesionHOSTOLD", "activa"); mostrarBuscador(); }
     else { mensajeAuth.textContent = "Usuario o contraseña incorrectos."; }
@@ -35,11 +35,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function ejecutarRegistro() {
     const u = regUsuario.value.trim().toLowerCase(), p = regPassword.value, cp = regConfirmarPassword.value;
-    if (!u || !p || !cp) return mensajeAuth.textContent = "Complete todos los campos.";
+    if (!u || !p || !cp) { mensajeAuth.textContent = "Complete todos los campos."; return; }
     let db = JSON.parse(localStorage.getItem("usuariosHOSTOLD")) || {}; db["admin"] = "1234";
-    if (db[u]) return mensajeAuth.textContent = "El usuario ya existe.";
-    if (p.length < 4) return mensajeAuth.textContent = "Mínimo 4 caracteres.";
-    if (p !== cp) return mensajeAuth.textContent = "Las contraseñas no coinciden.";
+    if (db[u]) { mensajeAuth.textContent = "El usuario ya existe."; return; }
+    if (p.length < 4) { mensajeAuth.textContent = "Mínimo 4 caracteres."; return; }
+    if (p !== cp) { mensajeAuth.textContent = "Las contraseñas no coinciden."; return; }
     db[u] = p; localStorage.setItem("usuariosHOSTOLD", JSON.stringify(db));
     regUsuario.value = ""; regPassword.value = ""; regConfirmarPassword.value = "";
     mensajeAuth.style.color = "#00ffaa"; mensajeAuth.textContent = "¡Registro exitoso! Redirigiendo...";
@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function mostrarBuscador() {
     panelAuth.hidden = true; panelMapas.hidden = false; limpiarSelect(region); agregarOpciones(region, Object.keys(datos)); cargarUbicacionPersistente();
     const imgQR = document.querySelector(".contenedor-qr img");
-    if (imgQR && !imgQR.src.includes("codigo_qr")) { imgQR.src = "codigo_qr.jpeg"; }
+    if (imgQR) { imgQR.src = "codigo_qr.jpeg"; }
   }
   const btnLogout = document.getElementById("btnCerrarSesion");
   if (btnLogout) btnLogout.addEventListener("click", () => { sessionStorage.removeItem("sesionHOSTOLD"); panelMapas.hidden = true; panelAuth.hidden = false; });
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (guardar) guardar.addEventListener("click", () => {
     const lg = lugar.value;
-    if (!region.value || !provincia.value || !distrito.value || !lg) return mensaje.textContent = "Complete la ubicación.";
+    if (!region.value || !provincia.value || !distrito.value || !lg) { mensaje.textContent = "Complete la ubicación."; return; }
     try { localStorage.setItem("ubicacionHOSTOLD", JSON.stringify({ region: region.value, provincia: provincia.value, distrito: distrito.value, lugar: lg })); } catch(e){}
     if (mapasConfig[lg]) {
       mapaActual = mapasConfig[lg]; mensaje.textContent = "Abriendo plano...";
@@ -101,7 +101,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const imgQR = document.querySelector(".contenedor-qr img");
   if (imgQR) {
-    if (!imgQR.src.includes("codigo_qr")) { imgQR.src = "codigo_qr.jpeg"; }
     imgQR.addEventListener("error", () => {
       const formatosQR = [".jpg", ".JPG", ".png", ".PNG"];
       if (intentoQR < formatosQR.length) {
@@ -123,10 +122,16 @@ document.addEventListener("DOMContentLoaded", () => {
       if (u.region && u.provincia && u.distrito && u.lugar && datos[u.region]?.[u.provincia]?.[u.distrito]?.includes(u.lugar)) {
         region.value = u.region; agregarOpciones(provincia, Object.keys(datos[u.region])); provincia.value = u.provincia;
         agregarOpciones(distrito, Object.keys(datos[u.region][u.provincia])); distrito.value = u.distrito;
-agregarOpciones(lugar, datos[u.region][u.provincia][u.distrito]); lugar.value = u.lugar; mensaje.textContent = "Ubicación restaurada.";
-}
-} catch(e){}
-}
-if (sessionStorage.getItem("sesionHOSTOLD") === "activa") { mostrarBuscador(); } else { panelAuth.hidden = false; panelMapas.hidden = true; }
-});
-<FollowUp>
+        agregarOpciones(lugar, datos[u.region][u.provincia][u.distrito]); lugar.value = u.lugar; mensaje.textContent = "Ubicación restaurada.";
+      }
+    } catch(e){}
+  }
+
+  // Comprobación inicial de sesión activa
+  if (sessionStorage.getItem("sesionHOSTOLD") === "activa") { 
+    mostrarBuscador(); 
+  } else { 
+    panelAuth.hidden = false; 
+    panelMapas.hidden = true; 
+  }
+}); // <-- ESTA LLAVE CIERRA EL EVENTO PRINCIPAL "DOMContentLoaded" QUE SE ABRE AL INICIO
