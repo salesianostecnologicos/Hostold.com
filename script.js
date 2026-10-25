@@ -9,128 +9,159 @@ const datos = {
   }
 };
 
-// --- Elementos del DOM del Login y Registro ---
-const panelLogin = document.getElementById("panelLogin");
+// --- Elementos de Control del Panel Auth ---
+const panelAuth = document.getElementById("panelAuth");
 const panelMapas = document.getElementById("panelMapas");
 const tabLogin = document.getElementById("tabLogin");
 const tabRegistro = document.getElementById("tabRegistro");
-const tituloAuth = document.getElementById("tituloAuth");
-const inputUsuario = document.getElementById("usuario");
-const inputPassword = document.getElementById("password");
-const grupoConfirmarPass = document.getElementById("grupoConfirmarPass");
-const inputConfirmarPassword = document.getElementById("confirmarPassword");
-const btnAuthAccion = document.getElementById("btnAuthAccion");
-const mensajeLogin = document.getElementById("mensajeLogin");
+const formLogin = document.getElementById("formLogin");
+const formRegistro = document.getElementById("formRegistro");
+const mensajeAuth = document.getElementById("mensajeAuth");
 const btnCerrarSesion = document.getElementById("btnCerrarSesion");
 
-// --- Elementos del DOM del Buscador y Visor ---
+// --- Inputs del Formulario Login ---
+const loginUsuario = document.getElementById("loginUsuario");
+const loginPassword = document.getElementById("loginPassword");
+const btnIngresar = document.getElementById("btnIngresar");
+
+// --- Inputs del Formulario Registro ---
+const regUsuario = document.getElementById("regUsuario");
+const regPassword = document.getElementById("regPassword");
+const regConfirmarPassword = document.getElementById("regConfirmarPassword");
+const btnRegistrar = document.getElementById("btnRegistrar");
+
+// --- Elementos del Buscador de Ubicaciones ---
 const region = document.getElementById("region");
 const provincia = document.getElementById("provincia");
 const distrito = document.getElementById("distrito");
 const lugar = document.getElementById("lugar");
-
 const guardar = document.getElementById("guardar");
 const mensaje = document.getElementById("mensaje");
 
+// --- Elementos del Visor de Mapa ---
 const visorMapa = document.getElementById("visorMapa");
 const cerrarMapa = document.getElementById("cerrarMapa");
 const imagenMapa = document.getElementById("imagenMapa");
 const descargarMapa = document.getElementById("descargarMapa");
 const errorImagen = document.getElementById("errorImagen");
 
-// Nombres de los archivos de imagen
+// Rutas de archivos correspondientes
 const mapaSalesiano = "IMG-20261001-WA0020.jpg";
 const mapaOpenPlaza = "image_35840f16.jpg";
 
-// Estado de la pestaña actual: "login" o "registro"
-let modoAuth = "login";
-
-// --- CONTROL DE PESTAÑAS (LOGIN / REGISTRO) ---
+// --- CONTROL DE PESTAÑAS INTERNAS ---
 tabLogin.addEventListener("click", () => {
-  modoAuth = "login";
   tabLogin.classList.add("activa");
   tabRegistro.classList.remove("activa");
-  tituloAuth.textContent = "Iniciar Sesión";
-  btnAuthAccion.textContent = "Ingresar";
-  grupoConfirmarPass.hidden = true;
-  mensajeLogin.textContent = "";
+  formLogin.hidden = false;
+  formRegistro.hidden = true;
+  mensajeAuth.textContent = "";
+  mensajeAuth.style.color = "#ff8b8b";
 });
 
 tabRegistro.addEventListener("click", () => {
-  modoAuth = "registro";
   tabRegistro.classList.add("activa");
   tabLogin.classList.remove("activa");
-  tituloAuth.textContent = "Crear Cuenta";
-  btnAuthAccion.textContent = "Registrarse";
-  grupoConfirmarPass.hidden = false;
-  mensajeLogin.textContent = "";
+  formLogin.hidden = true;
+  formRegistro.hidden = false;
+  mensajeAuth.textContent = "";
+  mensajeAuth.style.color = "#ff8b8b";
 });
 
-// --- PROCESAR AUTENTICACIÓN ---
-btnAuthAccion.addEventListener("click", procesarAuth);
+// --- ACCIÓN: INICIAR SESIÓN ---
+btnIngresar.addEventListener("click", ejecutarLogin);
 
-function procesarAuth() {
-  const user = inputUsuario.value.trim().toLowerCase();
-  const pass = inputPassword.value;
-  const confirmPass = inputConfirmarPassword.value;
+// Escuchar tecla Enter en el formulario de Login
+loginUsuario.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarLogin(); });
+loginPassword.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarLogin(); });
+
+function ejecutarLogin() {
+  const user = loginUsuario.value.trim().toLowerCase();
+  const pass = loginPassword.value;
 
   if (!user || !pass) {
-    mensajeLogin.textContent = "Por favor, complete todos los campos.";
+    mensajeAuth.style.color = "#ff8b8b";
+    mensajeAuth.textContent = "Por favor, llene todos los campos.";
     return;
   }
 
-  // Obtener lista de usuarios registrados del LocalStorage (o inicializar vacía)
-  let usuariosRegistrados = JSON.parse(localStorage.getItem("usuariosHOSTOLD")) || {};
+  let dbUsuarios = JSON.parse(localStorage.getItem("usuariosHOSTOLD")) || {};
+  dbUsuarios["admin"] = "1234"; // Cuenta por defecto de respaldo
 
-  // Incluir cuenta maestra por defecto por si acaso
-  usuariosRegistrados["admin"] = "1234";
-
-  if (modoAuth === "login") {
-    // LÓGICA DE INICIO DE SESIÓN
-    if (usuariosRegistrados[user] && usuariosRegistrados[user] === pass) {
-      sessionStorage.setItem("sesionHOSTOLD", "activa");
-      mensajeLogin.textContent = "";
-      inputUsuario.value = "";
-      inputPassword.value = "";
-      mostrarPanelMapas();
-    } else {
-      mensajeLogin.textContent = "Usuario o contraseña incorrectos.";
-    }
+  if (dbUsuarios[user] && dbUsuarios[user] === pass) {
+    sessionStorage.setItem("sesionHOSTOLD", "activa");
+    mensajeAuth.textContent = "";
+    loginUsuario.value = "";
+    loginPassword.value = "";
+    mostrarBuscador();
   } else {
-    // LÓGICA DE REGISTRO
-    if (usuariosRegistrados[user]) {
-      mensajeLogin.textContent = "El nombre de usuario ya está registrado.";
-      return;
-    }
-
-    if (pass.length < 4) {
-      mensajeLogin.textContent = "La contraseña debe tener al menos 4 caracteres.";
-      return;
-    }
-
-    if (pass !== confirmPass) {
-      mensajeLogin.textContent = "Las contraseñas no coinciden.";
-      return;
-    }
-
-    // Guardar nuevo usuario
-    usuariosRegistrados[user] = pass;
-    localStorage.setItem("usuariosHOSTOLD", JSON.stringify(usuariosRegistrados));
-
-    mensajeLogin.style.color = "#00ffaa";
-    mensajeLogin.textContent = "¡Registro exitoso! Ya puedes iniciar sesión.";
-    
-    // Cambiar automáticamente a la pestaña de Login después de 1.5 segundos
-    setTimeout(() => {
-      mensajeLogin.style.color = "#ff8b8b";
-      tabLogin.click();
-      inputUsuario.value = user;
-    }, 1500);
+    mensajeAuth.style.color = "#ff8b8b";
+    mensajeAuth.textContent = "Usuario o contraseña incorrectos.";
   }
 }
 
-function mostrarPanelMapas() {
-  panelLogin.hidden = true;
+// --- ACCIÓN: REGISTRARSE ---
+btnRegistrar.addEventListener("click", ejecutarRegistro);
+
+// Escuchar tecla Enter en el formulario de Registro
+regUsuario.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarRegistro(); });
+regPassword.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarRegistro(); });
+regConfirmarPassword.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarRegistro(); });
+
+function ejecutarRegistro() {
+  const user = regUsuario.value.trim().toLowerCase();
+  const pass = regPassword.value;
+  const confirmPass = regConfirmarPassword.value;
+
+  if (!user || !pass || !confirmPass) {
+    mensajeAuth.style.color = "#ff8b8b";
+    mensajeAuth.textContent = "Complete todos los campos del registro.";
+    return;
+  }
+
+  let dbUsuarios = JSON.parse(localStorage.getItem("usuariosHOSTOLD")) || {};
+  dbUsuarios["admin"] = "1234";
+
+  if (dbUsuarios[user]) {
+    mensajeAuth.style.color = "#ff8b8b";
+    mensajeAuth.textContent = "Este nombre de usuario ya existe.";
+    return;
+  }
+
+  if (pass.length < 4) {
+    mensajeAuth.style.color = "#ff8b8b";
+    mensajeAuth.textContent = "La contraseña debe tener mínimo 4 caracteres.";
+    return;
+  }
+
+  if (pass !== confirmPass) {
+    mensajeAuth.style.color = "#ff8b8b";
+    mensajeAuth.textContent = "Las contraseñas no coinciden.";
+    return;
+  }
+
+  // Guardar en el almacenamiento del navegador
+  dbUsuarios[user] = pass;
+  localStorage.setItem("usuariosHOSTOLD", JSON.stringify(dbUsuarios));
+
+  // Limpiar campos de registro
+  regUsuario.value = "";
+  regPassword.value = "";
+  regConfirmarPassword.value = "";
+
+  // Mostrar éxito en verde y regresar automáticamente al Login
+  mensajeAuth.style.color = "#00ffaa";
+  mensajeAuth.textContent = "¡Registro exitoso! Redirigiendo...";
+
+  setTimeout(() => {
+    tabLogin.click();
+    loginUsuario.value = user;
+  }, 1500);
+}
+
+// --- MANEJO DE VISTAS Y LOGOUT ---
+function mostrarBuscador() {
+  panelAuth.hidden = true;
   panelMapas.hidden = false;
   limpiarSelect(region);
   agregarOpciones(region, Object.keys(datos));
@@ -140,21 +171,21 @@ function mostrarPanelMapas() {
 btnCerrarSesion.addEventListener("click", () => {
   sessionStorage.removeItem("sesionHOSTOLD");
   panelMapas.hidden = true;
-  panelLogin.hidden = false;
+  panelAuth.hidden = false;
   mensaje.textContent = "Seleccione una ubicación.";
 });
 
-function verificarSesion() {
+function comprobarSesionActiva() {
   const sesion = sessionStorage.getItem("sesionHOSTOLD");
   if (sesion === "activa") {
-    mostrarPanelMapas();
+    mostrarBuscador();
   } else {
-    panelLogin.hidden = false;
+    panelAuth.hidden = false;
     panelMapas.hidden = true;
   }
 }
 
-// --- LÓGICA DE SELECTORES Y MAPAS ---
+// --- LOGICA DEL BUSCADOR DE UBICACIONES ---
 function limpiarSelect(select) {
   select.innerHTML = '<option value="">Seleccione...</option>';
   select.disabled = true;
@@ -232,6 +263,7 @@ guardar.addEventListener("click", () => {
   }
 });
 
+// Eventos de carga del mapa
 imagenMapa.addEventListener("load", () => { errorImagen.hidden = true; mensaje.textContent = "Mapa cargado correctamente."; });
 imagenMapa.addEventListener("error", () => { errorImagen.hidden = false; mensaje.textContent = "No se encontró la imagen. Revisa su nombre en GitHub."; });
 
@@ -249,25 +281,3 @@ function cargarUbicacionPersistente() {
   try {
     const datosGuardados = localStorage.getItem("ubicacionHOSTOLD");
     if (!datosGuardados) return;
-    const ubicacion = JSON.parse(datosGuardados);
-
-    if (ubicacion.region && datos[ubicacion.region]) {
-      region.value = ubicacion.region;
-      agregarOpciones(provincia, Object.keys(datos[ubicacion.region]));
-      if (ubicacion.provincia && datos[ubicacion.region][ubicacion.provincia]) {
-        provincia.value = ubicacion.provincia;
-        agregarOpciones(distrito, Object.keys(datos[ubicacion.region][ubicacion.provincia]));
-        if (ubicacion.distrito && datos[ubicacion.region][ubicacion.provincia][ubicacion.distrito]) {
-          distrito.value = ubicacion.distrito;
-          agregarOpciones(lugar, datos[ubicacion.region][ubicacion.provincia][ubicacion.distrito]);
-          if (ubicacion.lugar && datos[ubicacion.region][ubicacion.provincia][ubicacion.distrito].includes(ubicacion.lugar)) {
-            lugar.value = ubicacion.lugar;
-            mensaje.textContent = "Última ubicación restaurada correctamente.";
-          }
-        }
-      }
-    }
-  } catch (e) {}
-}
-
-verificarSesion();
