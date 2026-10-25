@@ -28,8 +28,8 @@ function ejecutarLogin() {
   else { mensajeAuth.textContent = "Usuario o contraseña incorrectos."; }
 }
 if (btnIngresar) btnIngresar.addEventListener("click", ejecutarLogin);
-loginUsuario.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarLogin(); });
-loginPassword.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarLogin(); });
+if (loginUsuario) loginUsuario.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarLogin(); });
+if (loginPassword) loginPassword.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarLogin(); });
 
 function ejecutarRegistro() {
   const u = regUsuario.value.trim().toLowerCase(), p = regPassword.value, cp = regConfirmarPassword.value;
@@ -44,9 +44,9 @@ function ejecutarRegistro() {
   setTimeout(() => { mensajeAuth.style.color = "#ff8b8b"; alternarPestanas(true); loginUsuario.value = u; }, 1200);
 }
 if (btnRegistrar) btnRegistrar.addEventListener("click", ejecutarRegistro);
-regUsuario.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarRegistro(); });
-regPassword.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarRegistro(); });
-regConfirmarPassword.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarRegistro(); });
+if (regUsuario) regUsuario.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarRegistro(); });
+if (regPassword) regPassword.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarRegistro(); });
+if (regConfirmarPassword) regConfirmarPassword.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarRegistro(); });
 
 function mostrarBuscador() {
   panelAuth.hidden = true; panelMapas.hidden = false; limpiarSelect(region); agregarOpciones(region, Object.keys(datos)); cargarUbicacionPersistente();
@@ -58,9 +58,9 @@ if (btnLogout) btnLogout.addEventListener("click", () => { sessionStorage.remove
 function limpiarSelect(s) { s.innerHTML = '<option value="">Seleccione...</option>'; s.disabled = true; }
 function agregarOpciones(s, ops) { s.innerHTML = '<option value="">Seleccione...</option>'; ops.forEach(o => { const el = document.createElement("option"); el.value = o; el.textContent = o; s.appendChild(el); }); s.disabled = false; }
 
-region.addEventListener("change", () => { limpiarSelect(provincia); limpiarSelect(distrito); limpiarSelect(lugar); if (region.value) agregarOpciones(provincia, Object.keys(datos[region.value])); });
-provincia.addEventListener("change", () => { limpiarSelect(distrito); limpiarSelect(lugar); if (provincia.value) agregarOpciones(distrito, Object.keys(datos[region.value][provincia.value])); });
-distrito.addEventListener("change", () => { limpiarSelect(lugar); if (distrito.value) agregarOpciones(lugar, datos[region.value][provincia.value][distrito.value]); });
+if (region) region.addEventListener("change", () => { limpiarSelect(provincia); limpiarSelect(distrito); limpiarSelect(lugar); if (region.value) agregarOpciones(provincia, Object.keys(datos[region.value])); });
+if (provincia) provincia.addEventListener("change", () => { limpiarSelect(distrito); limpiarSelect(lugar); if (provincia.value) agregarOpciones(distrito, Object.keys(datos[region.value][provincia.value])); });
+if (distrito) distrito.addEventListener("change", () => { limpiarSelect(lugar); if (distrito.value) agregarOpciones(lugar, datos[region.value][provincia.value][distrito.value]); });
 
 function cambiarPiso(num) {
   if (!mapaActual || !mapaActual.pisos[num]) return;
@@ -71,7 +71,7 @@ function cambiarPiso(num) {
 if (btnPiso1) btnPiso1.addEventListener("click", () => cambiarPiso(1));
 if (btnPiso2) btnPiso2.addEventListener("click", () => cambiarPiso(2));
 
-guardar.addEventListener("click", () => {
+if (guardar) guardar.addEventListener("click", () => {
   const lg = lugar.value;
   if (!region.value || !provincia.value || !distrito.value || !lg) { mensaje.textContent = "Complete la ubicación."; return; }
   try { localStorage.setItem("ubicacionHOSTOLD", JSON.stringify({ region: region.value, provincia: provincia.value, distrito: distrito.value, lugar: lg })); } catch(e){}
@@ -83,8 +83,8 @@ guardar.addEventListener("click", () => {
   }
 });
 
-imagenMapa.addEventListener("load", () => { errorImagen.hidden = true; mensaje.textContent = "Mapa cargado correctamente."; });
-imagenMapa.addEventListener("error", () => {
+if (imagenMapa) imagenMapa.addEventListener("load", () => { errorImagen.hidden = true; mensaje.textContent = "Mapa cargado correctamente."; });
+if (imagenMapa) imagenMapa.addEventListener("error", () => {
   const formatos = [".JPG", ".png", ".PNG", ".jpeg"];
   if (intentoExtension < formatos.length) {
     const ext = formatos[intentoExtension]; intentoExtension++;
@@ -105,8 +105,8 @@ if (imgQR) {
 }
 
 function cerrarVisor() { visorMapa.classList.remove("activo"); visorMapa.setAttribute("aria-hidden", "true"); imagenMapa.removeAttribute("src"); }
-cerrarMapa.addEventListener("click", cerrarVisor);
-visorMapa.addEventListener("click", (e) => { if (e.target === visorMapa) cerrarVisor(); });
+if (cerrarMapa) cerrarMapa.addEventListener("click", cerrarVisor);
+if (visorMapa) visorMapa.addEventListener("click", (e) => { if (e.target === visorMapa) cerrarVisor(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && visorMapa.classList.contains("activo")) cerrarVisor(); });
 
 function cargarUbicacionPersistente() {
