@@ -1,46 +1,75 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HOSTOLD | Mapas de Accesibilidad</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HOSTOLD | Mapas de Accesibilidad</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <h1>HOSTOLD</h1>
-  <p>Mapas de Accesibilidad ♿</p>
-</header>
 
-<main>
-<section class="panel">
-  <h2>Buscar ubicación</h2>
+  <header>
+    <h1>HOSTOLD</h1>
+    <p>Mapas de Accesibilidad ♿</p>
+  </header>
 
-  <label for="region">Región</label>
-  <select id="region"><option value="">Seleccione...</option></select>
+  <main>
+    <section class="panel">
+      <h2>Buscar ubicación</h2>
 
-  <label for="provincia">Provincia</label>
-  <select id="provincia" disabled><option value="">Seleccione...</option></select>
+      <label for="region">Región</label>
+      <select id="region">
+        <option value="">Seleccione...</option>
+      </select>
 
-  <label for="distrito">Distrito</label>
-  <select id="distrito" disabled><option value="">Seleccione...</option></select>
+      <label for="provincia">Provincia</label>
+      <select id="provincia" disabled>
+        <option value="">Seleccione...</option>
+      </select>
 
-  <label for="lugar">Lugar</label>
-  <select id="lugar" disabled><option value="">Seleccione...</option></select>
+      <label for="distrito">Distrito</label>
+      <select id="distrito" disabled>
+        <option value="">Seleccione...</option>
+      </select>
 
-  <button id="guardar">Guardar ubicación</button>
-  <p id="mensaje">Seleccione una ubicación.</p>
-</section>
-</main>
+      <label for="lugar">Lugar</label>
+      <select id="lugar" disabled>
+        <option value="">Seleccione...</option>
+      </select>
 
-<div id="visorMapa" class="visor-mapa">
-  <div class="visor-contenido">
-    <button id="cerrarMapa" class="cerrar-mapa" aria-label="Cerrar">×</button>
-    <img id="imagenMapa" src="" alt="Mapa de accesibilidad">
-    <a id="descargarMapa" class="boton-descargar" href="#" download>Descargar mapa</a>
+      <button id="guardar" type="button">
+        Guardar ubicación
+      </button>
+
+      <p id="mensaje" role="status">
+        Seleccione una ubicación.
+      </p>
+    </section>
+  </main>
+
+  <div id="visorMapa" class="visor-mapa" aria-hidden="true">
+    <section class="visor-contenido" role="dialog"
+      aria-modal="true" aria-label="Mapa del colegio">
+
+      <button id="cerrarMapa" class="cerrar-mapa"
+        type="button" aria-label="Cerrar mapa">×</button>
+
+      <h2>Mapa del Colegio Salesiano Santa Rosa</h2>
+
+      <img id="imagenMapa" src="" alt="Mapa del colegio">
+
+      <p id="errorImagen" class="error-imagen" hidden>
+        No se pudo cargar el mapa. Comprueba el nombre del archivo.
+      </p>
+
+      <a id="descargarMapa" class="boton-descargar"
+        href="#" download>
+        Descargar mapa
+      </a>
+    </section>
   </div>
-</div>
 
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
