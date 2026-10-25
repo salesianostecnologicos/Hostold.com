@@ -14,9 +14,15 @@
   </header>
 
   <main>
-    <!-- NUEVO: Panel de Inicio de Sesión -->
+    <!-- Panel de Autenticación (Login / Registro) -->
     <section id="panelLogin" class="panel">
-      <h2>Iniciar Sesión</h2>
+      <!-- Pestañas para alternar -->
+      <div class="pestanas-auth">
+        <button id="tabLogin" class="tab-btn activa" type="button">Ingresar</button>
+        <button id="tabRegistro" class="tab-btn" type="button">Registrarse</button>
+      </div>
+      
+      <h2 id="tituloAuth">Iniciar Sesión</h2>
       
       <label for="usuario">Usuario</label>
       <input type="text" id="usuario" placeholder="Ingrese su usuario">
@@ -24,12 +30,18 @@
       <label for="password">Contraseña</label>
       <input type="password" id="password" placeholder="Ingrese su contraseña">
 
-      <button id="btnIngresar" type="button">Ingresar</button>
+      <!-- Campo adicional que solo se mostrará al registrarse -->
+      <div id="grupoConfirmarPass" hidden>
+        <label for="confirmarPassword">Confirmar Contraseña</label>
+        <input type="password" id="confirmarPassword" placeholder="Repita su contraseña">
+      </div>
+
+      <button id="btnAuthAccion" type="button">Ingresar</button>
 
       <p id="mensajeLogin" role="status" class="error-login"></p>
     </section>
 
-    <!-- Panel de Búsqueda (Oculto por defecto con hidden) -->
+    <!-- Panel de Búsqueda (Oculto por defecto) -->
     <section id="panelMapas" class="panel" hidden>
       <div class="header-panel-mapas">
         <h2>Buscar ubicación</h2>
