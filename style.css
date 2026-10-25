@@ -1,3 +1,4 @@
+/* --- Estilos Base Estilo Cyberpunk Oscuro --- */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -51,7 +52,7 @@ main {
   text-align: center;
 }
 
-/* Estilos de las pestañas superiores de Login/Registro */
+/* Control de Pestañas Superiores */
 .pestanas-auth {
   display: flex;
   gap: 10px;
@@ -71,6 +72,8 @@ main {
   font-weight: bold;
   border-radius: 8px;
   font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .tab-btn.activa {
@@ -119,7 +122,9 @@ button {
   transition: all 0.2s;
 }
 
-#btnAuthAccion,
+/* Botones de acción principal */
+#btnIngresar,
+#btnRegistrar,
 #guardar {
   margin-top: 25px;
   border: none;
@@ -127,7 +132,8 @@ button {
   font-weight: bold;
 }
 
-#btnAuthAccion:hover,
+#btnIngresar:hover,
+#btnRegistrar:hover,
 #guardar:hover,
 .boton-descargar:hover {
   filter: brightness(1.12);
@@ -147,6 +153,7 @@ button {
   font-size: 14px;
 }
 
+/* Panel Interno del Buscador */
 .header-panel-mapas {
   display: flex;
   justify-content: space-between;
@@ -172,6 +179,7 @@ button {
   border-color: #dc2626;
 }
 
+/* Visor Modal de Mapas */
 .visor-mapa {
   position: fixed;
   inset: 0;
@@ -245,6 +253,7 @@ button {
   display: none;
 }
 
+/* Forzar ocultamiento con CSS cuando se use el atributo hidden */
 [hidden] {
   display: none !important;
 }
@@ -253,11 +262,9 @@ button {
   header h1 {
     font-size: 32px;
   }
-
   .panel {
     padding: 22px;
   }
-
   .visor-contenido {
     padding: 55px 12px 16px;
   }
