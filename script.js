@@ -9,6 +9,16 @@ const datos = {
   }
 };
 
+// --- Elementos del DOM del Login ---
+const panelLogin = document.getElementById("panelLogin");
+const panelMapas = document.getElementById("panelMapas");
+const inputUsuario = document.getElementById("usuario");
+const inputPassword = document.getElementById("password");
+const btnIngresar = document.getElementById("btnIngresar");
+const mensajeLogin = document.getElementById("mensajeLogin");
+const btnCerrarSesion = document.getElementById("btnCerrarSesion");
+
+// --- Elementos del DOM del Buscador y Visor ---
 const region = document.getElementById("region");
 const provincia = document.getElementById("provincia");
 const distrito = document.getElementById("distrito");
@@ -25,14 +35,74 @@ const errorImagen = document.getElementById("errorImagen");
 
 // Nombres de los archivos de imagen correspondientes
 const mapaSalesiano = "IMG-20261001-WA0020.jpg";
-const mapaOpenPlaza = "plano-open-plaza-piso1.png"; // Guarda la nueva imagen con este nombre
+const mapaOpenPlaza = "image_35840f16.jpg";
 
+// --- CONTROL DE INICIO DE SESIÓN ---
+const USUARIO_VALIDO = "admin";
+const PASSWORD_VALIDO = "1234";
+
+btnIngresar.addEventListener("click", iniciarSesion);
+
+// Permitir ingresar presionando Enter en los inputs
+inputUsuario.addEventListener("keydown", (e) => { if (e.key === "Enter") iniciarSesion(); });
+inputPassword.addEventListener("keydown", (e) => { if (e.key === "Enter") iniciarSesion(); });
+
+function iniciarSesion() {
+  const user = inputUsuario.value.trim();
+  const pass = inputPassword.value;
+
+  if (user === USUARIO_VALIDO && pass === PASSWORD_VALIDO) {
+    sessionStorage.setItem("sesionHOSTOLD", "activa");
+    mensajeLogin.textContent = "";
+    inputUsuario.value = "";
+    inputPassword.value = "";
+    
+    mostrarPanelMapas();
+  } else {
+    mensajeLogin.textContent = "Usuario o contraseña incorrectos.";
+  }
+}
+
+function mostrarPanelMapas() {
+  panelLogin.hidden = true;
+  panelMapas.hidden = false;
+  
+  // Reiniciar selectores por si acaso y cargar base
+  limpiarSelect(region);
+  agregarOpciones(region, Object.keys(datos));
+  
+  // Ejecutar la restauración si tiene una ubicación previa guardada en LocalStorage
+  cargarUbicacionPersistente();
+}
+
+btnCerrarSesion.addEventListener("click", () => {
+  sessionStorage.removeItem("sesionHOSTOLD");
+  panelMapas.hidden = true;
+  panelLogin.hidden = false;
+  mensaje.textContent = "Seleccione una ubicación.";
+});
+
+function verificarSesion() {
+  const sesion = sessionStorage.getItem("sesionHOSTOLD");
+  if (sesion === "activa") {
+    mostrarPanelMapas();
+  } else {
+    panelLogin.hidden = false;
+    panelMapas.hidden = true;
+    agregarOpciones(region, Object.keys(datos));
+  }
+}
+
+
+// --- LÓGICA DE SELECTORES Y MAPAS ---
 function limpiarSelect(select) {
   select.innerHTML = '<option value="">Seleccione...</option>';
   select.disabled = true;
 }
 
 function agregarOpciones(select, opciones) {
+  // Evitar duplicados al inicializar o recargar
+  select.innerHTML = '<option value="">Seleccione...</option>';
   opciones.forEach(opcion => {
     const elemento = document.createElement("option");
     elemento.value = opcion;
@@ -42,9 +112,6 @@ function agregarOpciones(select, opciones) {
 
   select.disabled = false;
 }
-
-// Cargar regiones inicialmente
-agregarOpciones(region, Object.keys(datos));
 
 // Cambio de región
 region.addEventListener("change", () => {
@@ -113,11 +180,9 @@ guardar.addEventListener("click", () => {
       JSON.stringify(ubicacion)
     );
   } catch (error) {
-    // La página seguirá funcionando aunque el navegador
-    // no permita guardar la ubicación localmente.
+    // Continuar si LocalStorage está deshabilitado
   }
 
-  // Capturar el elemento h2 dentro del visor para personalizarlo dinámicamente
   const tituloVisor = visorMapa.querySelector(".visor-contenido h2");
 
   if (lugar.value === "Colegio Salesiano Santa Rosa") {
@@ -173,14 +238,12 @@ function cerrarVisor() {
 
 cerrarMapa.addEventListener("click", cerrarVisor);
 
-// Cerrar al pulsar fuera del contenido
 visorMapa.addEventListener("click", evento => {
   if (evento.target === visorMapa) {
     cerrarVisor();
   }
 });
 
-// Cerrar con Escape
 document.addEventListener("keydown", evento => {
   if (evento.key === "Escape" &&
       visorMapa.classList.contains("activo")) {
@@ -196,21 +259,17 @@ function cargarUbicacionPersistente() {
 
     const ubicacion = JSON.parse(datosGuardados);
 
-    // 1. Restaurar Región
     if (ubicacion.region && datos[ubicacion.region]) {
       region.value = ubicacion.region;
       
-      // 2. Restaurar Provincia
       agregarOpciones(provincia, Object.keys(datos[ubicacion.region]));
       if (ubicacion.provincia && datos[ubicacion.region][ubicacion.provincia]) {
         provincia.value = ubicacion.provincia;
 
-        // 3. Restaurar Distrito
         agregarOpciones(distrito, Object.keys(datos[ubicacion.region][ubicacion.provincia]));
         if (ubicacion.distrito && datos[ubicacion.region][ubicacion.provincia][ubicacion.distrito]) {
           distrito.value = ubicacion.distrito;
 
-          // 4. Restaurar Lugar
           agregarOpciones(lugar, datos[ubicacion.region][ubicacion.provincia][ubicacion.distrito]);
           if (ubicacion.lugar && datos[ubicacion.region][ubicacion.provincia][ubicacion.distrito].includes(ubicacion.lugar)) {
             lugar.value = ubicacion.lugar;
@@ -220,9 +279,9 @@ function cargarUbicacionPersistente() {
       }
     }
   } catch (error) {
-    // Evita romper la app si el localStorage está corrupto o deshabilitado
+    // Evita romper la app si el localStorage está corrupto
   }
 }
 
-// Ejecutar la restauración al cargar la página
-cargarUbicacionPersistente();
+// Arrancar validando accesos
+verificarSesion();
