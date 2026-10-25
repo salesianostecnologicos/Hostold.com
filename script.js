@@ -2,7 +2,8 @@ const datos = {
   "Junín": {
     "Huancayo": {
       "Huancayo": [
-        "Colegio Salesiano Santa Rosa"
+        "Colegio Salesiano Santa Rosa",
+        "Open Plaza Huancayo"
       ]
     }
   }
@@ -22,7 +23,9 @@ const imagenMapa = document.getElementById("imagenMapa");
 const descargarMapa = document.getElementById("descargarMapa");
 const errorImagen = document.getElementById("errorImagen");
 
-const nombreMapa = "IMG-20261001-WA0020.jpg";
+// Nombres de los archivos de imagen correspondientes
+const mapaSalesiano = "IMG-20261001-WA0020.jpg";
+const mapaOpenPlaza = "plano-open-plaza-piso1.png"; // Guarda la nueva imagen con este nombre
 
 function limpiarSelect(select) {
   select.innerHTML = '<option value="">Seleccione...</option>';
@@ -85,7 +88,7 @@ distrito.addEventListener("change", () => {
   }
 });
 
-// Guardar ubicación y abrir el mapa
+// Guardar ubicación y abrir el mapa correspondiente
 guardar.addEventListener("click", () => {
   if (
     !region.value ||
@@ -114,15 +117,35 @@ guardar.addEventListener("click", () => {
     // no permita guardar la ubicación localmente.
   }
 
+  // Capturar el elemento h2 dentro del visor para personalizarlo dinámicamente
+  const tituloVisor = visorMapa.querySelector(".visor-contenido h2");
+
   if (lugar.value === "Colegio Salesiano Santa Rosa") {
     mensaje.textContent = "Abriendo el mapa del colegio...";
 
+    if (tituloVisor) tituloVisor.textContent = "Mapa del Colegio Salesiano Santa Rosa";
+    
     errorImagen.hidden = true;
     imagenMapa.alt = "Mapa del Colegio Salesiano Santa Rosa";
-    imagenMapa.src = nombreMapa;
+    imagenMapa.src = mapaSalesiano;
 
-    descargarMapa.href = nombreMapa;
-    descargarMapa.download = nombreMapa;
+    descargarMapa.href = mapaSalesiano;
+    descargarMapa.download = mapaSalesiano;
+
+    visorMapa.classList.add("activo");
+    visorMapa.setAttribute("aria-hidden", "false");
+
+  } else if (lugar.value === "Open Plaza Huancayo") {
+    mensaje.textContent = "Abriendo plano de evacuación...";
+
+    if (tituloVisor) tituloVisor.textContent = "Plano de Evacuación - Open Plaza Huancayo (Piso 1)";
+
+    errorImagen.hidden = true;
+    imagenMapa.alt = "Plano de Evacuación Open Plaza Huancayo Piso 1";
+    imagenMapa.src = mapaOpenPlaza;
+
+    descargarMapa.href = mapaOpenPlaza;
+    descargarMapa.download = mapaOpenPlaza;
 
     visorMapa.classList.add("activo");
     visorMapa.setAttribute("aria-hidden", "false");
@@ -165,7 +188,7 @@ document.addEventListener("keydown", evento => {
   }
 });
 
-// --- CONTINUACIÓN: Cargar ubicación guardada automáticamente al iniciar ---
+// Cargar ubicación guardada automáticamente al iniciar
 function cargarUbicacionPersistente() {
   try {
     const datosGuardados = localStorage.getItem("ubicacionHOSTOLD");
@@ -197,7 +220,7 @@ function cargarUbicacionPersistente() {
       }
     }
   } catch (error) {
-    // Evita romper la app si el localStorage está corrupto
+    // Evita romper la app si el localStorage está corrupto o deshabilitado
   }
 }
 
