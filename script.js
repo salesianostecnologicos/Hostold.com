@@ -8,12 +8,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const visorMapa = document.getElementById("visorMapa"), cerrarMapa = document.getElementById("cerrarMapa"), imagenMapa = document.getElementById("imagenMapa"), descargarMapa = document.getElementById("descargarMapa"), errorImagen = document.getElementById("errorImagen");
   const selectorPisos = document.getElementById("selectorPisos"), btnPiso1 = document.getElementById("btnPiso1"), btnPiso2 = document.getElementById("btnPiso2");
 
+  // Configuración de los mapas base
   const mapasConfig = {
     "Colegio Salesiano Santa Rosa": { alt: "Mapa del Colegio Salesiano Santa Rosa", pisos: { 1: "IMG-20261001-WA0020.jpg" } },
     "Open Plaza Huancayo": { alt: "Plano de Evacuación - Open Plaza Huancayo (Piso 1)", pisos: { 1: "image_35840f16.jpg" } },
     "I.E. 31554 José Carlos Mariátegui": { alt: "Plano de Evacuación - I.E. Mariátegui", pisos: { 1: "image_730ff32a.jpg", 2: "mariategui_piso2.jpg" } }
   };
   let mapaActual = null;
+  let intentoExtension = 0; // Control de reintentos dinámicos de formato de imagen
 
   function alternarPestanas(loginActivo) {
     tabLogin.classList.toggle("activa", loginActivo); tabRegistro.classList.toggle("activa", !loginActivo);
@@ -66,7 +68,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function cambiarPiso(num) {
     if (!mapaActual || !mapaActual.pisos[num]) return;
     btnPiso1.classList.toggle("activa", num === 1); btnPiso2.classList.toggle("activa", num === 2);
-    errorImagen.hidden = true; imagenMapa.src = mapaActual.pisos[num]; descargarMapa.href = mapaActual.pisos[num]; descargarMapa.download = mapaActual.pisos[num];
+    errorImagen.hidden = true;
+    intentoExtension = 0; // Reiniciar contador de intentos por piso
+    
+    const srcOriginal = mapaActual.pisos[num];
+    imagenMapa.src = srcOriginal; descargarMapa.href = srcOriginal; descargarMapa.download = srcOriginal;
   }
   if (btnPiso1) btnPiso1.addEventListener("click", () => cambiarPiso(1));
   if (btnPiso2) btnPiso2.addEventListener("click", () => cambiarPiso(2));
@@ -84,7 +90,28 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   if (imagenMapa) imagenMapa.addEventListener("load", () => { errorImagen.hidden = true; mensaje.textContent = "Mapa cargado correctamente."; });
-  if (imagenMapa) imagenMapa.addEventListener("error", () => { errorImagen.hidden = false; imagenMapa.removeAttribute("src"); mensaje.textContent = "Error al cargar la imagen en GitHub."; });
+  
+  if (imagenMapa) imagenMapa.addEventListener("error", () => {
+    // Si la imagen falla, intentaremos corregir el formato automáticamente antes de dar error definitivo
+    const formatosAlternativos = [".JPG", ".png", ".PNG", ".jpeg"];
+    
+    if (intentoExtension < formatosAlternativos.length) {
+      const proximaExtension = formatosAlternativos[intentoExtension];
+      intentoExtension++;
+      
+      // Obtener el nombre del archivo quitando el .jpg original
+      const nombreBase = imagenMapa.src.substring(0, imagenMapa.src.lastIndexOf('.'));
+      const nuevaRuta = nombreBase + proximaExtension;
+      
+      imagenMapa.src = nuevaRuta;
+      descargarMapa.href = nuevaRuta;
+    } else {
+      // Si ya fallaron todas las extensiones probables, muestra el error final
+      errorImagen.hidden = false;
+      imagenMapa.removeAttribute("src");
+      mensaje.textContent = "Error de archivo: Verifica las mayúsculas/minúsculas en GitHub.";
+    }
+  });
 
   function cerrarVisor() { visorMapa.classList.remove("activo"); visorMapa.setAttribute("aria-hidden", "true"); imagenMapa.removeAttribute("src"); }
   if (cerrarMapa) cerrarMapa.addEventListener("click", cerrarVisor);
@@ -101,5 +128,5 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch(e){}
   }
-  if (sessionStorage.getItem("sesionHOSTOLD") === "activa") { mostrarBuscador(); } else { panelAuth.hidden = false; panelMapas.hidden = true; }
+if (sessionStorage.getItem("sesionHOSTOLD") === "activa") { mostrarBuscador(); } else { panelAuth.hidden = false; panelMapas.hidden = true; }
 });
