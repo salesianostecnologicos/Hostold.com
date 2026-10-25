@@ -6,6 +6,7 @@ const loginUsuario = document.getElementById("loginUsuario"), loginPassword = do
 const regUsuario = document.getElementById("regUsuario"), regPassword = document.getElementById("regPassword"), regConfirmarPassword = document.getElementById("regConfirmarPassword"), btnRegistrar = document.getElementById("btnRegistrar");
 const visorMapa = document.getElementById("visorMapa"), cerrarMapa = document.getElementById("cerrarMapa"), imagenMapa = document.getElementById("imagenMapa"), descargarMapa = document.getElementById("descargarMapa"), errorImagen = document.getElementById("errorImagen");
 const selectorPisos = document.getElementById("selectorPisos"), btnPiso1 = document.getElementById("btnPiso1"), btnPiso2 = document.getElementById("btnPiso2");
+
 const mapasConfig = {
   "Colegio Salesiano Santa Rosa": { alt: "Mapa del Colegio Salesiano Santa Rosa", pisos: { 1: "IMG-20261001-WA0020.jpg" } },
   "Open Plaza Huancayo": { alt: "Plano de Evacuación - Open Plaza Huancayo (Piso 1)", pisos: { 1: "image_35840f16.jpg" } },
@@ -85,7 +86,7 @@ if (guardar) guardar.addEventListener("click", () => {
 
 if (imagenMapa) imagenMapa.addEventListener("load", () => { errorImagen.hidden = true; mensaje.textContent = "Mapa cargado correctamente."; });
 if (imagenMapa) imagenMapa.addEventListener("error", () => {
-  const formatos = [".JPG", ".png", ".PNG", ".jpeg"];
+  const formatos = [".JPG", ".png", ".PNG", ".jpeg", ".jpg"];
   if (intentoExtension < formatos.length) {
     const ext = formatos[intentoExtension]; intentoExtension++;
     const base = imagenMapa.src.substring(0, imagenMapa.src.lastIndexOf('.'));
