@@ -1,4 +1,3 @@
-
 const datos = {
   "Junín": {
     "Huancayo": {
@@ -41,7 +40,7 @@ function agregarOpciones(select, opciones) {
   select.disabled = false;
 }
 
-// Cargar regiones
+// Cargar regiones inicialmente
 agregarOpciones(region, Object.keys(datos));
 
 // Cambio de región
@@ -165,3 +164,42 @@ document.addEventListener("keydown", evento => {
     cerrarVisor();
   }
 });
+
+// --- CONTINUACIÓN: Cargar ubicación guardada automáticamente al iniciar ---
+function cargarUbicacionPersistente() {
+  try {
+    const datosGuardados = localStorage.getItem("ubicacionHOSTOLD");
+    if (!datosGuardados) return;
+
+    const ubicacion = JSON.parse(datosGuardados);
+
+    // 1. Restaurar Región
+    if (ubicacion.region && datos[ubicacion.region]) {
+      region.value = ubicacion.region;
+      
+      // 2. Restaurar Provincia
+      agregarOpciones(provincia, Object.keys(datos[ubicacion.region]));
+      if (ubicacion.provincia && datos[ubicacion.region][ubicacion.provincia]) {
+        provincia.value = ubicacion.provincia;
+
+        // 3. Restaurar Distrito
+        agregarOpciones(distrito, Object.keys(datos[ubicacion.region][ubicacion.provincia]));
+        if (ubicacion.distrito && datos[ubicacion.region][ubicacion.provincia][ubicacion.distrito]) {
+          distrito.value = ubicacion.distrito;
+
+          // 4. Restaurar Lugar
+          agregarOpciones(lugar, datos[ubicacion.region][ubicacion.provincia][ubicacion.distrito]);
+          if (ubicacion.lugar && datos[ubicacion.region][ubicacion.provincia][ubicacion.distrito].includes(ubicacion.lugar)) {
+            lugar.value = ubicacion.lugar;
+            mensaje.textContent = "Última ubicación restaurada correctamente.";
+          }
+        }
+      }
+    }
+  } catch (error) {
+    // Evita romper la app si el localStorage está corrupto
+  }
+}
+
+// Ejecutar la restauración al cargar la página
+cargarUbicacionPersistente();
