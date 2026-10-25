@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,8 +14,27 @@
   </header>
 
   <main>
-    <section class="panel">
-      <h2>Buscar ubicación</h2>
+    <!-- NUEVO: Panel de Inicio de Sesión -->
+    <section id="panelLogin" class="panel">
+      <h2>Iniciar Sesión</h2>
+      
+      <label for="usuario">Usuario</label>
+      <input type="text" id="usuario" placeholder="Ingrese su usuario">
+
+      <label for="password">Contraseña</label>
+      <input type="password" id="password" placeholder="Ingrese su contraseña">
+
+      <button id="btnIngresar" type="button">Ingresar</button>
+
+      <p id="mensajeLogin" role="status" class="error-login"></p>
+    </section>
+
+    <!-- Panel de Búsqueda (Oculto por defecto con hidden) -->
+    <section id="panelMapas" class="panel" hidden>
+      <div class="header-panel-mapas">
+        <h2>Buscar ubicación</h2>
+        <button id="btnCerrarSesion" class="boton-logout" type="button">Salir</button>
+      </div>
 
       <label for="region">Región</label>
       <select id="region">
@@ -50,14 +68,14 @@
 
   <div id="visorMapa" class="visor-mapa" aria-hidden="true">
     <section class="visor-contenido" role="dialog"
-      aria-modal="true" aria-label="Mapa del colegio">
+      aria-modal="true" aria-label="Mapa del lugar">
 
       <button id="cerrarMapa" class="cerrar-mapa"
         type="button" aria-label="Cerrar mapa">×</button>
 
-      <h2>Mapa del Colegio Salesiano Santa Rosa</h2>
+      <h2>Mapa de Accesibilidad</h2>
 
-      <img id="imagenMapa" src="" alt="Mapa del colegio">
+      <img id="imagenMapa" src="" alt="Mapa del lugar">
 
       <p id="errorImagen" class="error-imagen" hidden>
         No se pudo cargar el mapa. Comprueba el nombre del archivo.
