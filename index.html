@@ -14,34 +14,46 @@
   </header>
 
   <main>
-    <!-- Panel de Autenticación (Login / Registro) -->
-    <section id="panelLogin" class="panel">
-      <!-- Pestañas para alternar -->
+    <!-- Panel de Autenticación Unificado -->
+    <section id="panelAuth" class="panel">
+      <!-- Pestañas superiores para cambiar de modo -->
       <div class="pestanas-auth">
         <button id="tabLogin" class="tab-btn activa" type="button">Ingresar</button>
         <button id="tabRegistro" class="tab-btn" type="button">Registrarse</button>
       </div>
       
-      <h2 id="tituloAuth">Iniciar Sesión</h2>
-      
-      <label for="usuario">Usuario</label>
-      <input type="text" id="usuario" placeholder="Ingrese su usuario">
+      <!-- FORMULARIO DE INICIO DE SESIÓN -->
+      <div id="formLogin">
+        <h2>Iniciar Sesión</h2>
+        <label for="loginUsuario">Usuario</label>
+        <input type="text" id="loginUsuario" placeholder="Ingrese su usuario">
 
-      <label for="password">Contraseña</label>
-      <input type="password" id="password" placeholder="Ingrese su contraseña">
+        <label for="loginPassword">Contraseña</label>
+        <input type="password" id="loginPassword" placeholder="Ingrese su contraseña">
 
-      <!-- Campo adicional que solo se mostrará al registrarse -->
-      <div id="grupoConfirmarPass" hidden>
-        <label for="confirmarPassword">Confirmar Contraseña</label>
-        <input type="password" id="confirmarPassword" placeholder="Repita su contraseña">
+        <button id="btnIngresar" type="button">Ingresar</button>
       </div>
 
-      <button id="btnAuthAccion" type="button">Ingresar</button>
+      <!-- FORMULARIO DE REGISTRO (Oculto por defecto con hidden) -->
+      <div id="formRegistro" hidden>
+        <h2>Crear Cuenta</h2>
+        <label for="regUsuario">Nuevo Usuario</label>
+        <input type="text" id="regUsuario" placeholder="Cree un nombre de usuario">
 
-      <p id="mensajeLogin" role="status" class="error-login"></p>
+        <label for="regPassword">Contraseña</label>
+        <input type="password" id="regPassword" placeholder="Mínimo 4 caracteres">
+
+        <label for="regConfirmarPassword">Confirmar Contraseña</label>
+        <input type="password" id="regConfirmarPassword" placeholder="Repita la contraseña">
+
+        <button id="btnRegistrar" type="button">Registrarse</button>
+      </div>
+
+      <!-- Mensajes de estado del Login/Registro -->
+      <p id="mensajeAuth" role="status" class="error-login"></p>
     </section>
 
-    <!-- Panel de Búsqueda (Oculto por defecto) -->
+    <!-- Panel de Búsqueda de Mapas (Oculto por defecto) -->
     <section id="panelMapas" class="panel" hidden>
       <div class="header-panel-mapas">
         <h2>Buscar ubicación</h2>
