@@ -1,4 +1,4 @@
-const datos = { "Junín": { "Huancayo": { "Huancayo": ["Colegio Salesiano Santa Rosa", "Open Plaza Huancayo", "I.E. 31554 José Carlos Mariátegui", "Parque San Martín"] } } };
+const datos = { "Junín": { "Huancayo": { "Huancayo": ["Colegio Salesiano Santa Rosa", "Open Plaza Huancayo", "I.E. 31554 José Carlos Mariátegui", "Parque San Martín", "Sodimac"] } } };
 const region = document.getElementById("region"), provincia = document.getElementById("provincia"), distrito = document.getElementById("distrito"), lugar = document.getElementById("lugar");
 const guardar = document.getElementById("guardar"), mensaje = document.getElementById("mensaje"), panelAuth = document.getElementById("panelAuth"), panelMapas = document.getElementById("panelMapas");
 const tabLogin = document.getElementById("tabLogin"), tabRegistro = document.getElementById("tabRegistro"), formLogin = document.getElementById("formLogin"), formRegistro = document.getElementById("formRegistro"), mensajeAuth = document.getElementById("mensajeAuth");
@@ -11,7 +11,8 @@ const mapasConfig = {
   "Colegio Salesiano Santa Rosa": { alt: "Mapa del Colegio Salesiano Santa Rosa", pisos: { 1: "IMG-20261001-WA0020.jpg" } },
   "Open Plaza Huancayo": { alt: "Plano de Evacuación - Open Plaza Huancayo (Piso 1)", pisos: { 1: "image_35840f16.jpg" } },
   "I.E. 31554 José Carlos Mariátegui": { alt: "Plano de Evacuación - I.E. Mariátegui", pisos: { 1: "image_730ff32a.jpg", 2: "mariategui_piso2.jpg" } },
-  "Parque San Martín": { alt: "Planimetría General - Parque San Martín", pisos: { 1: "image_MS_aRS.png" } }
+  "Parque San Martín": { alt: "Planimetría General - Parque San Martín", pisos: { 1: "image_MS_aRS.png" } },
+  "Sodimac": { alt: "Plano de Evacuación y Accesibilidad - Sodimac Huancayo", pisos: { 1: "Sodimac.jpg" } }
 };
 let mapaActual = null; let intentoExtension = 0; let intentoQR = 0;
 
@@ -51,7 +52,7 @@ if (regPassword) regPassword.addEventListener("keyup", (e) => { if (e.key === "E
 if (regConfirmarPassword) regConfirmarPassword.addEventListener("keyup", (e) => { if (e.key === "Enter") ejecutarRegistro(); });
 
 function mostrarBuscador() {
-  panelAuth.hidden = true; panelMapas.hidden = false; limpiarSelect(region); agregarOpciones(region, Object.keys(datos)); cargarUbicacionPersistente();
+  panelAuth.hidden = true; panelMapas.hidden = false; limpiarSelect(region); agregarOpciones(region, Object.keys(datos));
   const imgQR = document.querySelector(".contenedor-qr img"); if (imgQR) { imgQR.src = "codigo_qr.jpeg"; }
 }
 const btnLogout = document.getElementById("btnCerrarSesion");
@@ -76,7 +77,6 @@ if (btnPiso2) btnPiso2.addEventListener("click", () => cambiarPiso(2));
 if (guardar) guardar.addEventListener("click", () => {
   const lg = lugar.value;
   if (!region.value || !provincia.value || !distrito.value || !lg) { mensaje.textContent = "Complete la ubicación."; return; }
-  try { localStorage.setItem("ubicacionHOSTOLD", JSON.stringify({ region: region.value, provincia: provincia.value, distrito: distrito.value, lugar: lg })); } catch(e){}
   if (mapasConfig[lg]) {
     mapaActual = mapasConfig[lg]; mensaje.textContent = "Abriendo plano...";
     const tit = visorMapa.querySelector(".visor-contenido h2"); if (tit) tit.textContent = mapaActual.alt;
@@ -107,18 +107,8 @@ if (imgQR) {
 }
 
 function cerrarVisor() { visorMapa.classList.remove("activo"); visorMapa.setAttribute("aria-hidden", "true"); imagenMapa.removeAttribute("src"); }
-cerrarMapa.addEventListener("click", cerrarVisor);
-visorMapa.addEventListener("click", (e) => { if (e.target === visorMapa) cerrarVisor(); });
+if (cerrarMapa) cerrarMapa.addEventListener("click", cerrarVisor);
+if (visorMapa) visorMapa.addEventListener("click", (e) => { if (e.target === visorMapa) cerrarVisor(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && visorMapa.classList.contains("activo")) cerrarVisor(); });
 
-function cargarUbicacionPersistente() {
-  try {
-    const g = localStorage.getItem("ubicacionHOSTOLD"); if (!g) return; const u = JSON.parse(g);
-    if (u.region && u.provincia && u.distrito && u.lugar && datos[u.region]?.[u.provincia]?.[u.distrito]?.includes(u.lugar)) {
-      region.value = u.region; agregarOpciones(provincia, Object.keys(datos[u.region])); provincia.value = u.provincia;
-      agregarOpciones(distrito, Object.keys(datos[u.region][u.provincia])); distrito.value = u.distrito;
-      agregarOpciones(lugar, datos[u.region][u.provincia][u.distrito]); lugar.value = u.lugar; mensaje.textContent = "Ubicación restaurada.";
-    }
-  } catch(e){}
-}
 if (sessionStorage.getItem("sesionHOSTOLD") === "activa") { mostrarBuscador(); } else { panelAuth.hidden = false; panelMapas.hidden = true; }
